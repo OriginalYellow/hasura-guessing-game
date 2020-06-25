@@ -35,7 +35,7 @@ minimal multiplayer guessing game webapp, the purpose of which is to demonstrate
     * if the game is complete, the winner's name should be instantly displayed as well
 * authentication/authorization/access control requirements:
   * JWT's (JSON Web Tokens) will be used for authentication and authorization
-    * a JWT will be stored in the browser for both anonymous users and signed-up users
+    * a JWT will be stored in the browser for both "temporary" users and "password-protected" users
     * hasura's permission system works smoothly with JWTs, and should be used as much as possible to...
       * authenticate users/decode JWTs ([docs](https://hasura.io/docs/1.0/graphql/manual/auth/authentication/jwt.html))
       * authorize mutations, actions, and queries ([docs](https://hasura.io/docs/1.0/graphql/manual/auth/authorization/index.html))
