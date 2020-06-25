@@ -33,3 +33,18 @@ minimal multiplayer guessing game webapp, the purpose of which is to demonstrate
   * what the current newest closest guess is
   * what the completion status of the game is, (NOT_STARTED|ONGOING|COMPLETE)
     * if the game is complete, the winner's name should be instantly displayed as well
+* authentication/authorization/access control requirements:
+  * JWT's (JSON Web Tokens) will be used for authentication and authorization
+    * a JWT will be stored in the browser for both anonymous users and signed-up users
+    * hasura's permission system works smoothly with JWTs, and should be used as much as possible to...
+      * authenticate users/decode JWTs ([docs](https://hasura.io/docs/1.0/graphql/manual/auth/authentication/jwt.html))
+      * authorize mutations, actions, and queries ([docs](https://hasura.io/docs/1.0/graphql/manual/auth/authorization/index.html))
+  * implement a concept of "temporary" users
+    * site visitors will be able to sign up as a "temporary" user and then must either choose a user name or a random name will be created for them
+    * temporary users can create and join games just like any other user
+    * a JWT will be generated just once upon sign-up and then stored in the users' browser storage
+    * temporary users may permanently lose their account if they clear their browsers' storage
+    * temporary users will have the option of adding a password to their account later (effectively upgrading their account from the temporary status to a "password-protected" status)
+  * implement secure password storage and token refreshing for "password-protected" users
+    * **this is low priority**
+    * you could use Auth0's basic JWT authentication flow to implement this
