@@ -6,7 +6,7 @@
   "scripts": {
     "dev:start:www": "cd www && npm run serve",
     "dev:start:hasura": "cd hasura && docker-compose up -d",
-    "dev:start:api": "cd api && npm run dev",
+    "dev:start:create-temp-user": "cd create-temp-user && npm run dev",
     "open:hasura-console": "cd hasura && npx hasura console",
     "check-migrations-dev": "cd hasura && hasura migrate status"
   },
