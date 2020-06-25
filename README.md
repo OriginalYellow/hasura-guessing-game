@@ -20,6 +20,9 @@ minimal multiplayer guessing game webapp, the purpose of which is to demonstrate
 * the player/user client will run in a browser (this is a "web app")
 * the "game design" should be implemented like so:
   * the game state's single source of truth is stored server-side
+  * the game rules will be all be applied server-side
+  * any input sent to the server by a player will validated there to prevent cheating
+* implement a concept of "game sessions":
   * users can start game sessions (the creator of a game session is called the "session host")
   * the session host is also a player in their own game session
   * each game session has a unique URL 
