@@ -1,0 +1,19 @@
+{
+  "name": "hasura-guessing-game",
+  "version": "1.0.0",
+  "description": "minimal multiplayer guessing game webapp, the purpose of which is to demonstrate hasura, graphql, and other cool things",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OriginalYellow/hasura-guessing-game.git"
+  },
+  "author": "Michael Joseph",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OriginalYellow/hasura-guessing-game/issues"
+  },
+  "homepage": "https://github.com/OriginalYellow/hasura-guessing-game#readme"
+}
