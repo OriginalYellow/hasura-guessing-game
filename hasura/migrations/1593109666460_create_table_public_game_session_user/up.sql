@@ -1,0 +1,1 @@
+CREATE TABLE "public"."game_session_user"("user_id" integer NOT NULL, "game_session_id" integer NOT NULL, PRIMARY KEY ("user_id","game_session_id") , FOREIGN KEY ("game_session_id") REFERENCES "public"."game_session"("id") ON UPDATE restrict ON DELETE restrict, FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON UPDATE restrict ON DELETE restrict);
