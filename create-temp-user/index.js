@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const fetch = require("node-fetch")
+const jwt = require('jsonwebtoken')
+const fetch = require('node-fetch')
+const fs = require('fs')
 const { json } = require('micro')
 
 const HASURA_OPERATION = `
@@ -27,11 +28,11 @@ const execute = async (variables) => {
       }
     }
   );
-  
+
   const data = await fetchResponse.json();
   return data;
 };
-  
+
 // Request Handler
 const handler = async (req, res) => {
   let reqData = null
@@ -55,10 +56,30 @@ const handler = async (req, res) => {
     return res.status(400).json(errors[0])
   }
 
-  // success
+  // create token and add hasura claims
+  const hasuraNamespace = "https://hasura.io/jwt/claims";
+
+  const hasuraClaims = {
+    "x-hasura-default-role": "user",
+    "x-hasura-allowed-roles": ["user"],
+    "x-hasura-user-id": `${data.insert_user_one.id}`
+  };
+
+  var privateKey = fs.readFileSync('private.key');
+
+  var token = jwt.sign(
+    {
+      ...data.insert_user_one,
+      [hasuraNamespace]: hasuraClaims
+    },
+    privateKey,
+    { algorithm: 'RS256' }
+  )
+
+  // send response
   return {
     ...data.insert_user_one,
-    token: 'afaketoken1234'
+    token
   }
 
 };

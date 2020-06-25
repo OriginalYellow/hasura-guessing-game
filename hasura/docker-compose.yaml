@@ -22,5 +22,6 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: HVVTa3PSDocVJvbliFlu
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "RS256", "key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6rw5sUoerJPyfTRMXSmi\nmbX2r6YHuIFDHU9+vcVE0enM8xFYQpjgC1sCObcqhg6zMkNunVqeE1MI00iVyAE4\nX49lla/6o3U+RsPZTeDinf44SPyyuRqW3eIb7gXKncgcO+XOf+hGJGins2D7HXZq\nn4g60Ur8bcipVgM0iHAmkW4lS8bVgfCLcItpHyNaFKIOtTdQJ4Vu3sSFZS78tFYj\nupvYyQ+xSCqYao8bpVVnTzx3Kf716TtRxzYxhgjAicJbW3N9S6MlX9prA9oCTAiK\nq5NwkcFvseh7NYFaQiVvbzGP+EP6tPRYivtE/y8hs65i5REbIyF6I6Sk9PWLNWKx\n8QIDAQAB\n-----END PUBLIC KEY-----"}'
 volumes:
   db_data_hasura_guessing_game:
