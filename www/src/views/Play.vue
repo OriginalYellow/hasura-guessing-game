@@ -1,11 +1,18 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row justify="center">
+      <!-- view title -->
       <v-col cols="12">
-        <!-- view title -->
         <p class="text-center text-h2">Play View</p>
+      </v-col>
 
-        <p v-if="dataLoaded">
+      <!-- game session details -->
+      <v-col
+        v-if="dataLoaded"
+        cols="12"
+      >
+
+        <p>
           <!-- host display -->
           <span class="font-weight-bold">Host: </span>
           {{ hostName }}
@@ -24,6 +31,19 @@
           >{{ playerName }}{{ ((i + 1) == playerNames.length) ? '' : ', ' }}</span>
         </p>
       </v-col>
+
+      <v-col
+        v-else
+        cols="6"
+      >
+        <v-alert
+          type="warning"
+          prominent
+          border="left"
+        >
+          You must first sign up before you can join this game.
+        </v-alert>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -39,7 +59,7 @@ export default {
       dataLoaded: false,
       hostName: null,
       completionStatus: null,
-      players: [],
+      players: []
     };
   },
 
@@ -103,7 +123,9 @@ export default {
               .then(
                 ({
                   data: {
-                    insert_game_session_user_one: { game_session: { players } }
+                    insert_game_session_user_one: {
+                      game_session: { players }
+                    }
                   }
                 }) => {
                   this.players = players;

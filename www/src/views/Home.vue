@@ -1,19 +1,18 @@
 <template>
   <v-container>
-    <v-row class="text-center">
+    <v-row>
       <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        />
+        <!-- view title -->
+        <p class="text-center text-h2">Home View</p>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+// MIKE: replace parts of your relative paths with this @ shortcut wherever
+// possible:
+
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue';
 

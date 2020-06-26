@@ -65,6 +65,10 @@ export default new Vuex.Store({
 
       // store it in memory too
       dispatch('login', { token, userName: name, userId: id })
+
+      // redirect to home page (this avoids a certain defect that happens if you
+      // sign up while on the play screen)
+      router.push('/')
     },
 
     login({ commit }, { token, userId, userName }) {
