@@ -74,6 +74,8 @@
         - game_session:
             completion_status:
               _eq: not_started
+      set:
+        user_id: x-hasura-User-Id
       columns:
       - game_session_id
       - user_id

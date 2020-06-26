@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import HomeView from '../views/Home.vue';
 import AboutView from '../views/About.vue';
-import JoinView from '../views/Join.vue';
 import PlayView from '../views/Play.vue';
 
 Vue.use(VueRouter);
@@ -17,11 +16,6 @@ const routes = [
     path: '/about',
     name: 'About',
     component: AboutView,
-  },
-  {
-    path: '/join',
-    name: 'Join',
-    component: JoinView,
   },
   {
     path: '/play',
