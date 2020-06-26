@@ -46,9 +46,11 @@ export default new Vuex.Store({
       // get a token and new user data
       const { data: { createTempUser: { token, name, id } } } = await apolloClient.mutate({
         mutation: createTempUser,
-        variables: {
-          name: 'cooluser70'
-        },
+        // MIKE: if you add a form for selecting a temporary username, you can
+        // just include the name variable like this:
+        // variables: {
+        //   name: 'cooluser70'
+        // },
       })
 
       localStorage.setItem(previouslyLoggedInKey, 'true')

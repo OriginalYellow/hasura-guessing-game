@@ -1,4 +1,4 @@
-mutation createTempUserMutation($name: String) {
+mutation createTempUserMutation($name: String = "") {
   createTempUser(name: $name) {
     id
     name

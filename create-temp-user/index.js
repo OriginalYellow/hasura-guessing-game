@@ -1,7 +1,9 @@
+const jsonFormat = require('json-format')
 const jwt = require('jsonwebtoken')
 const fetch = require('node-fetch')
 const fs = require('fs')
-const { json } = require('micro')
+const { json, createError } = require('micro')
+const generateName = require('./generateName')
 
 const HASURA_OPERATION = `
 mutation insertUserOne($name: String) {
@@ -11,6 +13,8 @@ mutation insertUserOne($name: String) {
   }
 }
 `;
+
+const UNIQUE_NAME_VIOLATION_MESSAGE = 'Uniqueness violation. duplicate key value violates unique constraint "user_name_key"'
 
 // execute the parent operation in Hasura
 const execute = async (variables) => {
@@ -44,17 +48,38 @@ const handler = async (req, res) => {
   }
 
   // get request input
-  const { name } = reqData.input;
+  var { name } = reqData.input;
 
   // run some business logic
+  var data = null
+  
+  // generate a random name if name is not provided
+  if (name == '') {
+    // generate new random names until a unqiue one is found
+    while(true) {
+      name = generateName()
+      const executeRet = await execute({ name });
+      const errors = executeRet.errors
+  
+      if (!errors) {
+        data = executeRet.data
+        break
+      } else if (errors[0].message == UNIQUE_NAME_VIOLATION_MESSAGE) {
+        continue
+      } else {
+        throw createError(500, jsonFormat(errors[0]))
+      }
+    }
+  // else use the provided name 
+  } else {
+    var executeRet = await execute({ name });
 
-  // execute the Hasura operation
-  const { data, errors } = await execute({ name });
-
-  // if Hasura operation errors, then throw error
-  if (errors) {
-    return res.status(400).json(errors[0])
-  }
+    if (executeRet.errors) {
+      throw createError(500, jsonFormat(executeRet.errors[0]))
+    } else {
+      data = executeRet.data
+    }
+  } 
 
   // create token and add hasura claims
   const hasuraNamespace = "https://hasura.io/jwt/claims";
