@@ -8,6 +8,11 @@
 
       <v-spacer />
 
+      <span
+        v-show="loggedIn"
+        class="mr-4"
+      >signed in as "{{ userName }}"</span>
+
       <v-btn
         v-show="!loggedIn"
         @click="signup"
@@ -36,7 +41,7 @@ import { mapState, mapActions } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(['loggedIn'])
+    ...mapState(['loggedIn', 'userName'])
   },
 
   methods: {

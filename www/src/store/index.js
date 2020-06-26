@@ -35,8 +35,8 @@ export default new Vuex.Store({
     refreshLogin({ dispatch }) {
       if (localStorage.getItem(previouslyLoggedInKey) == 'true') {
         const token = localStorage.getItem(tokenKey)
-        const userId = localStorage.getItem(userId)
-        const userName = localStorage.getItem(userName)
+        const userId = localStorage.getItem(userIdKey)
+        const userName = localStorage.getItem(userNameKey)
 
         dispatch('login', { token, userId, userName })
       }
