@@ -21,4 +21,7 @@ new Vue({
   vuetify,
   apolloProvider: createProvider(apolloClient),
   render: (h) => h(App),
+  created() {
+    store.dispatch('refreshLogin');
+  }
 }).$mount('#app');

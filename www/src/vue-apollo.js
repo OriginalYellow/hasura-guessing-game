@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client';
+import store from './store';
 
 // Install the vue plugin
 Vue.use(VueApollo);
@@ -19,8 +20,7 @@ const defaultOptions = {
   persisting: false,
   websocketsOnly: false,
   ssr: false,
-  // MIKE: add this back in when you set up auth
-  // getAuth: () => `Bearer ${store.state.idToken}`,
+  getAuth: () => store.state.loggedIn ? `Bearer ${store.state.token}` : '',
 
   // MIKE: add this in and install apollo-cache-inmemory if the below issue
   // shows up
