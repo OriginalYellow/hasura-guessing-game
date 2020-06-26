@@ -29,11 +29,6 @@ const routes = [
     name: 'Play',
     component: PlayView,
   },
-  {
-    path: '/signup',
-    name: 'Signup',
-    component: SignupView,
-  },
 ];
 
 const router = new VueRouter({

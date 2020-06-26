@@ -10,7 +10,7 @@
 
       <v-btn
         v-show="!isLoggedIn"
-        to="/signup"
+
         color="blue"
         dark
         depressed
@@ -35,8 +35,8 @@
 export default {
   data() {
     return {
-      isLoggedIn: false
-    }
+      isLoggedIn: false,
+    };
   },
-}
+};
 </script>
