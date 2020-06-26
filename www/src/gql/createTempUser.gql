@@ -1,0 +1,7 @@
+mutation createTempUserMutation($name: String) {
+  createTempUser(name: $name) {
+    id
+    name
+    token
+  }
+}

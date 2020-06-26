@@ -9,8 +9,8 @@
       <v-spacer />
 
       <v-btn
-        v-show="!isLoggedIn"
-
+        v-show="!loggedIn"
+        @click="signup"
         color="blue"
         dark
         depressed
@@ -19,7 +19,7 @@
       </v-btn>
 
       <v-btn
-        v-show="isLoggedIn"
+        v-show="loggedIn"
         color="purple"
         dark
         depressed
@@ -32,11 +32,15 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
+
 export default {
-  data() {
-    return {
-      isLoggedIn: false,
-    };
+  computed: {
+    ...mapState(['loggedIn'])
   },
+
+  methods: {
+    ...mapActions(['signup'])
+  }
 };
 </script>

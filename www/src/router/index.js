@@ -4,7 +4,6 @@ import HomeView from '../views/Home.vue';
 import AboutView from '../views/About.vue';
 import JoinView from '../views/Join.vue';
 import PlayView from '../views/Play.vue';
-import SignupView from '../views/Signup.vue';
 
 Vue.use(VueRouter);
 
