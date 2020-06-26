@@ -1,0 +1,7 @@
+mutation insertGameSessionOne {
+  insert_game_session_one(object: {}) {
+    host_id
+    id
+    completion_status
+  }
+}

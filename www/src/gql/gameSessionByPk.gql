@@ -1,0 +1,10 @@
+query gameSessionByPk($id: Int!) {
+  game_session_by_pk(id: $id) {
+    id
+    host {
+      id
+      name
+    }
+    completion_status
+  }
+}

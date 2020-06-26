@@ -37,6 +37,8 @@
       check:
         host_id:
           _eq: X-Hasura-User-Id
+      set:
+        host_id: x-hasura-User-Id
       columns:
       - host_id
       backend_only: false

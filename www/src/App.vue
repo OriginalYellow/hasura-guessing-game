@@ -10,7 +10,7 @@
 
       <span
         v-show="loggedIn"
-        class="mr-4"
+        class="mr-4 text-subtitle-2 font-italic"
       >signed in as "{{ userName }}"</span>
 
       <v-btn
@@ -25,6 +25,7 @@
 
       <v-btn
         v-show="loggedIn"
+        @click="newGame"
         color="purple"
         dark
         depressed
@@ -32,20 +33,23 @@
         new game
       </v-btn>
     </v-app-bar>
-    <router-view />
+
+    <v-main>
+      <router-view />
+    </v-main>
   </v-app>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions } from "vuex";
 
 export default {
   computed: {
-    ...mapState(['loggedIn', 'userName'])
+    ...mapState(["loggedIn", "userName"])
   },
 
   methods: {
-    ...mapActions(['signup'])
+    ...mapActions(["signup", "newGame"])
   }
 };
 </script>

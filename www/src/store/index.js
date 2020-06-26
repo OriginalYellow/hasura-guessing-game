@@ -4,6 +4,8 @@ import gql from 'graphql-tag';
 import router from '../router';
 import { apolloClient } from '../main';
 import createTempUser from '../gql/createTempUser.gql'
+import insertGameSessionOne from '../gql/insertGameSessionOne.gql'
+import gameSessionByPk from '../gql/gameSessionByPk.gql'
 
 const previouslyLoggedInKey = 'guessing_game_previously_logged_in'
 const tokenKey = 'guessing_game_token'
@@ -70,6 +72,14 @@ export default new Vuex.Store({
       commit('setLoggedIn', true)
       commit('setUserId', userId)
       commit('setUserName', userName)
+    },
+
+    async newGame() {
+      const { data: { insert_game_session_one: { id } } } = await apolloClient.mutate({
+        mutation: insertGameSessionOne
+      })
+
+      router.push({ name: 'Play', query: { id } })
     }
   },
 
