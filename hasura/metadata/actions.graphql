@@ -1,0 +1,15 @@
+type Mutation {
+  createTempUser (
+    name: String
+  ): CreateTempUserOutput
+}
+
+
+
+
+type CreateTempUserOutput {
+  id : Int!
+  name : String!
+  token : String!
+}
+

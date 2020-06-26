@@ -1,6 +1,13 @@
-actions: []
+actions:
+- name: createTempUser
+  definition:
+    kind: synchronous
+    handler: http://10.0.0.21:1234/
+  permissions:
+  - role: anonymous
 custom_types:
   enums: []
   input_objects: []
-  objects: []
+  objects:
+  - name: CreateTempUserOutput
   scalars: []

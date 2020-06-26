@@ -1,1 +1,129 @@
-[]
+- table:
+    schema: public
+    name: completion_status
+  is_enum: true
+  array_relationships:
+  - name: game_sessions
+    using:
+      foreign_key_constraint_on:
+        column: completion_status
+        table:
+          schema: public
+          name: game_session
+- table:
+    schema: public
+    name: game_session
+  object_relationships:
+  - name: completionStatusByCompletionStatus
+    using:
+      foreign_key_constraint_on: completion_status
+  - name: host
+    using:
+      foreign_key_constraint_on: host_id
+  - name: winner
+    using:
+      foreign_key_constraint_on: winner_id
+  array_relationships:
+  - name: players
+    using:
+      foreign_key_constraint_on:
+        column: game_session_id
+        table:
+          schema: public
+          name: game_session_user
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        host_id:
+          _eq: X-Hasura-User-Id
+      columns:
+      - host_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - closest_guess
+      - completion_status
+      - host_id
+      - id
+      - winner_id
+      filter: {}
+      limit: 10
+      allow_aggregations: true
+- table:
+    schema: public
+    name: game_session_user
+  object_relationships:
+  - name: game_session
+    using:
+      foreign_key_constraint_on: game_session_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - game_session:
+            completion_status:
+              _eq: not_started
+      columns:
+      - game_session_id
+      - user_id
+      backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - created_at
+      - game_session_id
+      - user_id
+      filter: {}
+      limit: 10
+- table:
+    schema: public
+    name: user
+  array_relationships:
+  - name: game_sessions
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: game_session_user
+  - name: hosted_game_sessions
+    using:
+      foreign_key_constraint_on:
+        column: host_id
+        table:
+          schema: public
+          name: game_session
+  - name: won_game_sessions
+    using:
+      foreign_key_constraint_on:
+        column: winner_id
+        table:
+          schema: public
+          name: game_session
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - name
+      filter: {}
+      limit: 10
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - name
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+      check: {}
