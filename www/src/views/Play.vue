@@ -49,6 +49,7 @@
 
 <script>
 import gameSessionByPk from "../gql/gameSessionByPk.gql";
+import gameSessionByPkSubscription from "../gql/gameSessionByPkSubscription.gql";
 import insertGameSessionUserOne from "../gql/insertGameSessionUserOne.gql";
 import { mapState } from "vuex";
 
@@ -57,7 +58,7 @@ import { mapState } from "vuex";
 export default {
   data() {
     return {
-      game_session_by_pk: null
+      game_session_by_pk: null,
     };
   },
 
@@ -70,6 +71,15 @@ export default {
         query: gameSessionByPk,
         variables: {
           id: this.$route.query.id
+        },
+        subscribeToMore: {
+          document: gameSessionByPkSubscription,
+          variables: {
+            id: this.$route.query.id
+          },
+          updateQuery: (previousResult, { subscriptionData }) => {
+            return subscriptionData.game_session_by_pk
+          }
         },
         result({
           data: {
@@ -130,6 +140,6 @@ export default {
     snakeToNormalCase: function(str) {
       return str.replace("_", " ");
     }
-  },
+  }
 };
 </script>

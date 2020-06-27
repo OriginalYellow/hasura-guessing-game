@@ -1,0 +1,18 @@
+subscription gameSessionByPk($id: Int!) {
+  game_session_by_pk(id: $id) {
+    id
+    host {
+      id
+      name
+    }
+    completion_status
+    players {
+      user {
+        id
+        name
+      }
+      game_session_id
+      user_id
+    }
+  }
+}
