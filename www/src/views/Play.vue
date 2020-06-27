@@ -8,10 +8,9 @@
 
       <!-- game session details -->
       <v-col
-        v-if="dataLoaded"
+        v-if="game_session_by_pk"
         cols="12"
       >
-
         <p>
           <!-- host display -->
           <span class="font-weight-bold">Host: </span>
@@ -53,66 +52,31 @@ import gameSessionByPk from "../gql/gameSessionByPk.gql";
 import insertGameSessionUserOne from "../gql/insertGameSessionUserOne.gql";
 import { mapState } from "vuex";
 
+// MIKE: you need to handle possible exceptions (like someone navigating
+// here without a query string)
 export default {
   data() {
     return {
-      dataLoaded: false,
-      hostName: null,
-      completionStatus: null,
-      players: []
+      game_session_by_pk: null
     };
   },
 
-  computed: {
-    ...mapState(["userId"]),
-
-    computedPlayers() {
-      return this.players.map(({ user }) => ({
-        userId: user.id,
-        userName: user.name
-      }));
-    },
-
-    playerNames() {
-      return this.computedPlayers.map(x => x.userName);
-    }
-  },
-
-  filters: {
-    snakeToNormalCase: function(str) {
-      return str.replace("_", " ");
-    }
-  },
-
-  mounted() {
-    // MIKE: you need to handle possible exceptions (like someone navigating
-    // here without a query string)
-    this.$apollo
-      .mutate({
-        mutation: gameSessionByPk,
+  apollo: {
+    // MIKE: use the "update" option to format the result instead of doing so
+    // inside of a bunch of computed properties like you are doing now. this
+    // will also let you rename the result from that ugly snake case ew
+    game_session_by_pk() {
+      return {
+        query: gameSessionByPk,
         variables: {
           id: this.$route.query.id
-        }
-      })
-      .then(
-        ({
+        },
+        result({
           data: {
-            game_session_by_pk: {
-              host: { name },
-              completion_status,
-              players
-            }
+            game_session_by_pk: { players }
           }
-        }) => {
-          // update data
-          this.dataLoaded = true;
-          this.hostName = name;
-          this.completionStatus = completion_status;
-          // MIKE: you could eagarly add new players here
-          this.players = players;
-
-          // add player to game if they are not already in
-          if (!~this.computedPlayers.findIndex(x => x.userId == this.userId)) {
+        }) {
+          if (!~players.findIndex(x => x.user_id == this.userId)) {
             this.$apollo
               .mutate({
                 mutation: insertGameSessionUserOne,
@@ -123,17 +87,49 @@ export default {
               .then(
                 ({
                   data: {
-                    insert_game_session_user_one: {
-                      game_session: { players }
-                    }
+                    insert_game_session_user_one: { game_session }
                   }
                 }) => {
-                  this.players = players;
+                  this.game_session_by_pk = game_session;
                 }
               );
           }
         }
-      );
-  }
+      };
+    }
+  },
+
+  computed: {
+    ...mapState(["userId"]),
+
+    dataLoaded() {
+      return !!this.game_session_by_pk;
+    },
+
+    hostName() {
+      return this.game_session_by_pk.host.name;
+    },
+
+    completionStatus() {
+      return this.game_session_by_pk.completion_status;
+    },
+
+    players() {
+      return this.game_session_by_pk.players.map(({ user }) => ({
+        userId: user.id,
+        userName: user.name
+      }));
+    },
+
+    playerNames() {
+      return this.players.map(x => x.userName);
+    }
+  },
+
+  filters: {
+    snakeToNormalCase: function(str) {
+      return str.replace("_", " ");
+    }
+  },
 };
 </script>
