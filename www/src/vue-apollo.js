@@ -14,8 +14,7 @@ Vue.use(VueApollo);
 // Config
 const defaultOptions = {
   httpEndpoint: process.env.VUE_APP_GRAPHQL_HTTP,
-  // MIKE: add this back in when you set up realtime graphql
-  // wsEndpoint: process.env.VUE_APP_GRAPHQL_WS || 'ws://localhost:4000/graphql',
+  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS,
   tokenName: '',
   persisting: false,
   websocketsOnly: false,
@@ -38,8 +37,10 @@ export function createClient(options = {}) {
     ...options,
   });
 
-  // MIKE: add this back in when you set up realtime graphql
-  // apolloClient.wsClient = wsClient;
+  // wsClient () documentation:
+  // https://github.com/apollographql/subscriptions-transport-ws#subscriptionclient
+  // NOTE: you can mutate the client to change its options
+  apolloClient.wsClient = wsClient;
 
   return apolloClient;
 }
@@ -55,6 +56,7 @@ export function createProvider(apolloClient) {
     },
     errorHandler(error) {
       // eslint-disable-next-line no-console
+      // MIKE: this logging should be disabled in production
       console.log(error);
     },
   });
