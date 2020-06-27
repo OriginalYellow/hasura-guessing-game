@@ -48,9 +48,9 @@
 </template>
 
 <script>
-import gameSessionByPk from "../gql/gameSessionByPk.gql";
-import gameSessionByPkSubscription from "../gql/gameSessionByPkSubscription.gql";
-import insertGameSessionUserOne from "../gql/insertGameSessionUserOne.gql";
+import gameSessionByPk from "@/gql/gameSessionByPk.gql";
+import gameSessionByPkSubscription from "@/gql/gameSessionByPkSubscription.gql";
+import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
 import { mapState } from "vuex";
 
 // MIKE: you need to handle possible exceptions (like someone navigating
@@ -69,18 +69,23 @@ export default {
     game_session_by_pk() {
       return {
         query: gameSessionByPk,
+
         variables: {
           id: this.$route.query.id
         },
+
         subscribeToMore: {
           document: gameSessionByPkSubscription,
+
           variables: {
             id: this.$route.query.id
           },
+
           updateQuery: (previousResult, { subscriptionData }) => {
             return subscriptionData.game_session_by_pk
           }
         },
+
         result({
           data: {
             game_session_by_pk: { players }

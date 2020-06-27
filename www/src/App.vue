@@ -4,7 +4,14 @@
       fixed
       app
     >
-      <v-toolbar-title>The Guessing Game</v-toolbar-title>
+      <v-toolbar-title v-ripple="{center: false, class: `purple--text`} ">
+        <router-link
+          tag="span"
+          to="/"
+          class="pa-5"
+          :style="toolbarTitleStyle"
+        >The Guessing Game</router-link>
+      </v-toolbar-title>
 
       <v-spacer />
 
@@ -44,6 +51,12 @@
 import { mapState, mapActions } from "vuex";
 
 export default {
+  data() {
+    return {
+      toolbarTitleStyle: { cursor: "pointer" }
+    }
+  },
+  
   computed: {
     ...mapState(["loggedIn", "userName"])
   },

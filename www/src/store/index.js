@@ -1,19 +1,21 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import gql from 'graphql-tag';
-import router from '../router';
-import { apolloClient } from '../main';
-import createTempUser from '../gql/createTempUser.gql'
-import insertGameSessionOne from '../gql/insertGameSessionOne.gql'
-import gameSessionByPk from '../gql/gameSessionByPk.gql'
+import { restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client';
+import router from '@/router';
+import { apolloClient } from '@/main';
+import createTempUser from '@/gql/createTempUser.gql'
+import insertGameSessionOne from '@/gql/insertGameSessionOne.gql'
+import gameSessionByPk from '@/gql/gameSessionByPk.gql'
 
+// MIKE: i don't like using snake case for these local storage keys
 const previouslyLoggedInKey = 'guessing_game_previously_logged_in'
 const tokenKey = 'guessing_game_token'
 const userNameKey = 'guessing_game_user_name'
 const userIdKey = 'guessing_game_user_id'
 
+// some util functions
 const set = property => (state, payload) => (state[property] = payload);
-
 const toggle = property => state => (state[property] = !state[property]);
 
 Vue.use(Vuex);
@@ -35,7 +37,10 @@ export default new Vuex.Store({
 
   actions: {
     refreshLogin({ dispatch }) {
-      if (localStorage.getItem(previouslyLoggedInKey) == 'true') {
+      if (
+        (typeof localStorage != undefined)
+        && (localStorage.getItem(previouslyLoggedInKey) == 'true')
+      ) {
         const token = localStorage.getItem(tokenKey)
         const userId = parseInt(localStorage.getItem(userIdKey))
         const userName = localStorage.getItem(userNameKey)
@@ -55,14 +60,20 @@ export default new Vuex.Store({
         // },
       })
 
-      localStorage.setItem(previouslyLoggedInKey, 'true')
+      if (typeof localStorage != 'undefined') {
+        localStorage.setItem(previouslyLoggedInKey, 'true')
 
-      // store user data in local storage (i know this is bad but i dont think
-      // it's too bad in this case)
-      localStorage.setItem(tokenKey, token)
-      localStorage.setItem(userIdKey, id)
-      localStorage.setItem(userNameKey, name)
+        // store user data in local storage (i know this is bad but i dont think
+        // it's too bad in this case)
+        localStorage.setItem(tokenKey, token)
+        localStorage.setItem(userIdKey, id)
+        localStorage.setItem(userNameKey, name)
+      }
 
+      // NOTE: source code for restartWebsockets:
+      // https://github.com/thetre97/vue-cli-plugin-apollo/blob/e4a25845386eb2c921b3d1e1b4ee00ce41a88df9/graphql-client/src/index.js#L182
+      if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
+      
       // store it in memory too
       dispatch('login', { token, userName: name, userId: id })
 

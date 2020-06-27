@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import HomeView from '../views/Home.vue';
-import PlayView from '../views/Play.vue';
+import HomeView from '@/views/Home.vue';
+import PlayView from '@/views/Play';
 
 Vue.use(VueRouter);
 
