@@ -1,3 +1,6 @@
+// MIKE: I don't see any reason why these lenses should be coupled to a specific
+// query, they should probably be in a different file
+
 import * as R from 'ramda'
 import * as L from "partial.lenses"
 import * as RA from 'ramda-adjunct'
@@ -18,7 +21,7 @@ const lenseSelect = R.pipe(
 
 // lens model
 const Model = {
-  data: 'data'
+  data: 'data',
 }
 
 const Data = {
@@ -36,13 +39,24 @@ const Host = {
 }
 
 const Player = {
-  user: ['user']
+  user: ['user'],
+  userId: ['user_id']
 }
 
 const User = {
   name: ['name'],
   id: ['id']
 }
+
+Model.playerById = id => [
+  Model.data,
+  Data.gameSessionByPk,
+  GameSessionByPk.players,
+  L.find(L.get([
+    Player.userId,
+    R.equals(id)
+  ])),
+]
 
 // lens transforms
 export const Transform = {
@@ -118,3 +132,43 @@ export const Lens = {
 //     }
 //   }
 // }
+
+
+// SCRATCH:
+// const playerById = id => [
+//   Model.data,
+//   Data.gameSessionByPk,
+//   GameSessionByPk.players,
+//   L.find(L.get([Player.userId, R.equals(id)])),
+// ]
+
+// L.get(Model.playerById(35), mockData) // ? 
+
+// const playerByIdIso = id => [
+//   Model.data,
+//   Data.gameSessionByPk,
+//   GameSessionByPk.players,
+//   L.normalize(R.sortBy(L.get([Player.userId]))),
+//   L.find(L.get([Player.userId, R.equals(id)])),
+//   Player.userId,
+//   L.is(id)
+// ]
+
+// L.get(playerByIdIso(35)) (mockData) // ?
+// L.get(playerByIdIso(34)) (mockData) // ?
+
+// const sampleFlags = ['id-19', 'id-76']
+
+// const flag = id => [
+//   L.normalize(R.sortBy(R.identity)),
+//   L.find(R.equals(id)),
+//   L.is(id)
+// ]
+
+// L.get(flag('id-69'), sampleFlags) // ?
+
+// L.get(flag('id-76'), sampleFlags) // ?
+
+// L.set(flag('id-69'), true, sampleFlags) // ?
+
+// L.set(flag('id-76'), false, sampleFlags) /// ?

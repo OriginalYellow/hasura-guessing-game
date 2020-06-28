@@ -48,12 +48,14 @@
 </template>
 
 <script>
-import gameSessionByPk from "@/gql/gameSessionByPk.gql";
-import gameSessionByPkSubscription from "@/gql/gameSessionByPkSubscription.gql";
-import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
-import { mapState } from "vuex";
-import { Transform } from "@/lenses/gameSessionByPk.js"
+import { mapState } from "vuex"
 import * as RA from 'ramda-adjunct'
+import * as L from 'partial.lenses'
+import gameSessionByPk from "@/gql/gameSessionByPk.gql"
+import gameSessionByPkSubscription from "@/gql/gameSessionByPkSubscription.gql"
+import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql"
+import { Transform, Lens } from "@/lenses/gameSessionByPk.js"
+const { Data, Model, GameSessionByPk } = Lens
 
 // MIKE: you need to handle possible exceptions (like someone navigating
 // here without a query string)
@@ -61,7 +63,6 @@ export default {
   data() {
     return {
       gameSession: null,
-      debugData: null
     };
   },
 
@@ -69,36 +70,23 @@ export default {
     gameSession() {
       return {
         query: gameSessionByPk,
-
         variables: {
           id: this.$route.query.id
         },
-
         // NOTE: if there is no data payload in the response, update is passed
         // an empty object (for some dumb reason)
         update: data => RA.isNilOrEmpty(data) ? null : Transform.data(data),
-
         subscribeToMore: {
           document: gameSessionByPkSubscription,
-
           variables: {
             id: this.$route.query.id
           },
-
           updateQuery: (previousResult, { subscriptionData }) => {
             return subscriptionData.game_session_by_pk
           }
         },
-
-        // MIKE: reuse lenses instead of destructuring here.
-        result({
-          data: {
-          // MIKE: if there is no response payload, accessing "players" throws
-          // an error
-            game_session_by_pk: { players }
-          }
-        }) {
-          if (!~players.findIndex(x => x.user_id == this.userId)) {
+        result(response) {
+          if (!L.get(Model.playerById(this.userId), response)) {
             this.$apollo
               .mutate({
                 mutation: insertGameSessionUserOne,
@@ -107,11 +95,7 @@ export default {
                 }
               })
               .then(
-                ({
-                  data: {
-                    insert_game_session_user_one: { game_session }
-                  }
-                }) => {
+                ({ data: { insert_game_session_user_one: { game_session } } }) => {
                   this.gameSession = game_session;
                 }
               );
