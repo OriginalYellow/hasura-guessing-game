@@ -8,18 +8,18 @@
 
       <!-- game session details -->
       <v-col
-        v-if="game_session_by_pk"
+        v-if="dataLoaded"
         cols="12"
       >
         <p>
           <!-- host display -->
           <span class="font-weight-bold">Host: </span>
-          {{ hostName }}
+          {{ gameSession.hostName }}
           <br>
 
           <!-- completion status display -->
           <span class="font-weight-bold">Game Status: </span>
-          {{ completionStatus | snakeToNormalCase}}
+          {{ gameSession.completionStatus | snakeToNormalCase}}
           <br>
 
           <!-- players display -->
@@ -52,27 +52,31 @@ import gameSessionByPk from "@/gql/gameSessionByPk.gql";
 import gameSessionByPkSubscription from "@/gql/gameSessionByPkSubscription.gql";
 import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
 import { mapState } from "vuex";
+import { Transform } from "@/lenses/gameSessionByPk.js"
+import * as RA from 'ramda-adjunct'
 
 // MIKE: you need to handle possible exceptions (like someone navigating
 // here without a query string)
 export default {
   data() {
     return {
-      game_session_by_pk: null,
+      gameSession: null,
+      debugData: null
     };
   },
 
   apollo: {
-    // MIKE: use the "update" option to format the result instead of doing so
-    // inside of a bunch of computed properties like you are doing now. this
-    // will also let you rename the result from that ugly snake case ew
-    game_session_by_pk() {
+    gameSession() {
       return {
         query: gameSessionByPk,
 
         variables: {
           id: this.$route.query.id
         },
+
+        // NOTE: if there is no data payload in the response, update is passed
+        // an empty object (for some dumb reason)
+        update: data => RA.isNilOrEmpty(data) ? null : Transform.data(data),
 
         subscribeToMore: {
           document: gameSessionByPkSubscription,
@@ -86,8 +90,11 @@ export default {
           }
         },
 
+        // MIKE: reuse lenses instead of destructuring here.
         result({
           data: {
+          // MIKE: if there is no response payload, accessing "players" throws
+          // an error
             game_session_by_pk: { players }
           }
         }) {
@@ -105,7 +112,7 @@ export default {
                     insert_game_session_user_one: { game_session }
                   }
                 }) => {
-                  this.game_session_by_pk = game_session;
+                  this.gameSession = game_session;
                 }
               );
           }
@@ -118,26 +125,15 @@ export default {
     ...mapState(["userId"]),
 
     dataLoaded() {
-      return !!this.game_session_by_pk;
-    },
-
-    hostName() {
-      return this.game_session_by_pk.host.name;
-    },
-
-    completionStatus() {
-      return this.game_session_by_pk.completion_status;
-    },
-
-    players() {
-      return this.game_session_by_pk.players.map(({ user }) => ({
-        userId: user.id,
-        userName: user.name
-      }));
+      return !!this.gameSession;
     },
 
     playerNames() {
-      return this.players.map(x => x.userName);
+      if (this.dataLoaded) {
+        return this.gameSession.players.map(x => x.userName);
+      }
+      
+      return []
     }
   },
 
