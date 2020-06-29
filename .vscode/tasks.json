@@ -1,0 +1,51 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558 
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "check-migrations-prod",
+      "type": "shell",
+      "command": "npx hasura migrate status --endpoint https://hasura.michaeljoseph.dev --admin-secret",
+      "args": [
+        "${input:adminSecret}"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}/hasura"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "apply-migrations-prod",
+      "type": "shell",
+      "command": "npx hasura migrate apply --endpoint https://hasura.michaeljoseph.dev --admin-secret",
+      "args": [
+        "${input:adminSecret}"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}/hasura"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "apply-metadata-prod",
+      "type": "shell",
+      "command": "npx hasura metadata apply --endpoint https://hasura.michaeljoseph.dev --admin-secret",
+      "args": [
+        "${input:adminSecret}"
+      ],
+      "options": {
+        "cwd": "${workspaceRoot}/hasura"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "adminSecret",
+      "type": "promptString",
+      "description": "admin secret",
+      "password": true
+    }
+  ]
+}
