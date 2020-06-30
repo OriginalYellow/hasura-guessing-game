@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "env": {
+    "PRIVATE_KEY": "@hasura-guessing-game-private-key",
+    "HASURA_ADMIN_SECRET": "@hasura-guessing-game-hasura-admin-secret",
+    "HASURA_ENDPOINT": "https://hasura.michaeljoseph.dev/v1/graphql"
+  },
+  "builds": [{
+      "src": "www/package.json",
+      "use": "@now/static-build"
+    },
+    {
+      "src": "create-temp-user/index.js",
+      "use": "@now/node"
+    }
+  ],
+  "routes": [{
+      "src": "/create-temp-user",
+      "dest": "/create-temp-user/index.js"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/www/js/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/www/css/$1"
+    },
+    {
+      "src": "/fonts/(.*)",
+      "dest": "/www/fonts/$1"
+    },
+    {
+      "src": "/img/(.*)",
+      "dest": "/www/img/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/www/assets/$1"
+    },
+    {
+      "src": ".*",
+      "dest": "/www/index.html"
+    }
+  ]
+}

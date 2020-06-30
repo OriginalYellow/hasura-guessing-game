@@ -1,5 +1,5 @@
-# MIKE: during deployment, this should be automatically copied (and renamed) to
-# the droplet
+# MIKE: during deployment, the contents of this folder should be automatically
+# copied to /etc/hasura/hasura-guessing-game in the droplet
 version: '3.6'
 services:
   postgres:

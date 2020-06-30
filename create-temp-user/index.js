@@ -2,7 +2,7 @@ const jsonFormat = require('json-format')
 const jwt = require('jsonwebtoken')
 const fetch = require('node-fetch')
 const fs = require('fs')
-const { json, createError } = require('micro')
+const { json, createError, send } = require('micro')
 const generateName = require('./generateName')
 
 const HASURA_OPERATION = `
@@ -19,7 +19,7 @@ const UNIQUE_NAME_VIOLATION_MESSAGE = 'Uniqueness violation. duplicate key value
 // execute the parent operation in Hasura
 const execute = async (variables) => {
   const fetchResponse = await fetch(
-    "http://localhost:8080/v1/graphql",
+    process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
     {
       method: 'POST',
       body: JSON.stringify({
@@ -27,8 +27,7 @@ const execute = async (variables) => {
         variables
       }),
       headers: {
-        // MIKE: replace this with an env var
-        'x-hasura-admin-secret': 'HVVTa3PSDocVJvbliFlu'
+        'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
       }
     }
   );
@@ -52,15 +51,15 @@ const handler = async (req, res) => {
 
   // run some business logic
   var data = null
-  
+
   // generate a random name if name is not provided
   if (name == '') {
     // generate new random names until a unqiue one is found
-    while(true) {
+    while (true) {
       name = generateName()
       const executeRet = await execute({ name });
       const errors = executeRet.errors
-  
+
       if (!errors) {
         data = executeRet.data
         break
@@ -70,7 +69,7 @@ const handler = async (req, res) => {
         throw createError(500, jsonFormat(errors[0]))
       }
     }
-  // else use the provided name 
+    // else use the provided name 
   } else {
     var executeRet = await execute({ name });
 
@@ -79,7 +78,7 @@ const handler = async (req, res) => {
     } else {
       data = executeRet.data
     }
-  } 
+  }
 
   // create token and add hasura claims
   const hasuraNamespace = "https://hasura.io/jwt/claims";
@@ -90,7 +89,15 @@ const handler = async (req, res) => {
     "x-hasura-user-id": `${data.insert_user_one.id}`
   };
 
-  var privateKey = fs.readFileSync('private.key');
+  var privateKey;
+
+  if (process.env.NODE_ENV == 'production') {
+    privateKey = process.env.PRIVATE_KEY
+  } else if (process.env.NODE_ENV === 'development') {
+    privateKey = fs.readFileSync('private.key')
+  } else {
+    throw new Error("NODE_ENV not set to a recognized value")
+  }
 
   var token = jwt.sign(
     {
@@ -101,12 +108,27 @@ const handler = async (req, res) => {
     { algorithm: 'RS256' }
   )
 
-  // send response
-  return {
+  const res$ = {
     ...data.insert_user_one,
     token
   }
 
+  console.log("res$:")
+  console.log(res$)
+
+  // send response
+  // return {
+  //   ...data.insert_user_one,
+  //   token
+  // }
+
+  send(
+    res,
+    '200',
+    {
+      ...data.insert_user_one,
+      token
+    })
 };
 
 module.exports = handler;

@@ -2,10 +2,14 @@
   "name": "hasura-guessing-game-client",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "now-build": "npm run build"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",

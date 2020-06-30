@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "minimal multiplayer guessing game webapp, the purpose of which is to demonstrate hasura, graphql, and other cool things",
   "main": "index.js",
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "dev": "concurrently -p \"{command}--{time}\" -t \"mm:ss\" \"npm:dev:start*\"",
     "dev:start:www": "cd www && npm run serve",

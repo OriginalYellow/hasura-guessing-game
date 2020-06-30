@@ -1,0 +1,5 @@
+hasura.michaeljoseph.dev {
+    proxy / graphql-engine:8080 {
+        websocket
+    }
+}
