@@ -4,11 +4,19 @@
   "description": "sendGameEvent action for hasura-guessing-game",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "micro",
+    "dev:start": "micro-dev -p 1235"
   },
   "author": "Michael Joseph",
   "license": "ISC",
   "dependencies": {
+    "json-format": "^1.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "micro": "^9.3.4",
+    "node-fetch": "^2.6.0",
     "xstate": "^4.10.0"
+  },
+  "devDependencies": {
+    "micro-dev": "^3.0.0"
   }
 }

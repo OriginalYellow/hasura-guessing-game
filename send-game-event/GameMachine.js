@@ -4,11 +4,20 @@ import { Machine, interpret, assign } from 'xstate';
 // buttons should be enabled on the client
 // (https://xstate.js.org/docs/guides/states.html#state-nextevents)
 
+// MIKE: you need to prevent players from guessing if it is not their turn. You
+// will be decoding their user id from their token, so you can depend the
+// "playerId" being accurate
+
+// MIKE: organize these free functions into namespaces 
+
+const getRandomInt = (min, max) => {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 const calcGuessDistance = (guessValue, secretNumber) => {
   if (guessValue <= secretNumber) {
     return (secretNumber - guessValue);
-  }
-  else {
+  } else {
     return (guessValue - secretNumber);
   }
 }
@@ -17,8 +26,11 @@ const updateClosestGuess = assign({
   closestGuess: ({ secretNumber, closestGuess, playerIds, turnIndex }, { value }) => {
     if (
       !closestGuess
-      || calcGuessDistance(value) < calcGuessDistance(closestGuess.value)
-    ) {
+      || (
+          calcGuessDistance(value, secretNumber)
+          < calcGuessDistance(closestGuess.value, secretNumber)
+        )
+      ) {
       return {
         playerId: playerIds[turnIndex],
         value
@@ -31,12 +43,24 @@ const updateClosestGuess = assign({
 
 const incrementTurnIndex = assign({
   turnIndex: ({ turnIndex, playerIds }) => {
-    if ((turnIndex + 1) == playerIds.length ) {
+    if ((turnIndex + 1) == playerIds.length) {
       return 0
     }
 
     return turnIndex + 1
   }
+})
+
+const setWinner = assign({
+  winner: ({ closestGuess: { playerId } }) => playerId
+})
+
+const setSecretNumber = assign({
+  secretNumber: () => getRandomInt(-100, 100)
+})
+
+const mockSetSecretNumber = assign({
+  secretNumber: () => 50
 })
 
 const enoughPlayers = context => context.playerIds.length > 1
@@ -49,9 +73,9 @@ const isClosestGuessersTurn = ({ closestGuess, turnIndex, playerIds }) => {
   return closestGuess.playerId == playerIds[turnIndex]
 }
 
-const setWinner = assign({
-  winner: ({ closestGuess: { playerId } }) => playerId 
-})
+const isGuessersTurn = ({ turnIndex, playerIds }, { playerId }) => {
+  return playerId == playerIds[turnIndex]
+}
 
 const GameMachine = Machine(
   {
@@ -64,7 +88,8 @@ const GameMachine = Machine(
             target: 'ongoing',
             cond: 'enoughPlayers'
           }
-        }
+        },
+        exit: 'setSecretNumber'
       },
       ongoing: {
         on: {
@@ -72,12 +97,13 @@ const GameMachine = Machine(
             { target: 'completed', cond: 'isClosestGuessersTurn' }
           ],
           GUESS: {
-            actions: [ 'updateClosestGuess', 'incrementTurnIndex' ]
+            cond: 'isGuessersTurn',
+            actions: ['updateClosestGuess', 'incrementTurnIndex']
           }
         }
       },
       completed: {
-        entry: setWinner,
+        entry: 'setWinner',
         type: 'final'
       }
     },
@@ -86,18 +112,21 @@ const GameMachine = Machine(
     actions: {
       updateClosestGuess,
       incrementTurnIndex,
-      setWinner
+      setWinner,
+      // setSecretNumber
+      setSecretNumber: mockSetSecretNumber
     },
     guards: {
       enoughPlayers,
-      isClosestGuessersTurn
+      isClosestGuessersTurn,
+      isGuessersTurn
     }
   }
 );
 
-const createGameMachine = (playerIds, secretNumber) => {
+const createGameMachine = playerIds => {
   return GameMachine.withContext({
-    secretNumber,
+    secretNumber: null,
     playerIds,
     closestGuess: null,
     turnIndex: 0,
