@@ -1,0 +1,14 @@
+{
+  "name": "send-game-event",
+  "version": "1.0.0",
+  "description": "sendGameEvent action for hasura-guessing-game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Joseph",
+  "license": "ISC",
+  "dependencies": {
+    "xstate": "^4.10.0"
+  }
+}
