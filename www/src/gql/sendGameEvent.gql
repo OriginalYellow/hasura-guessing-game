@@ -1,0 +1,5 @@
+mutation sendGameEvent($eventType: gameEventType!, $gameSessionId: Int!, $payload: json) {
+  sendGameEvent(eventType: $eventType, gameSessionId: $gameSessionId, payload: $payload ) {
+    id
+  }
+}

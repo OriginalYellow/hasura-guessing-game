@@ -35,11 +35,13 @@ const GameSessionByPk = {
   turnIndex: ['turn_index'],
   winner: ['winner'],
   closestGuesser: ['closest_guesser'],
-  closestGuess: ['closest_guess']
+  closestGuess: ['closest_guess'],
+  id: ['id']
 }
 
 const Host = {
-  name: ['name']
+  name: ['name'],
+  id: ['id']
 }
 
 const Winner = {
@@ -75,9 +77,14 @@ export const Transform = {
   data: L.get([
     Data.gameSessionByPk,
     lenseSelect({
+      id: GameSessionByPk.id,
       hostName: [
         GameSessionByPk.host,
         Host.name
+      ],
+      hostId: [
+        GameSessionByPk.host,
+        Host.id
       ],
       completionStatus: GameSessionByPk.completionStatus,
       closestGuesserName: [

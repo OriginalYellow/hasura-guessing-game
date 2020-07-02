@@ -108,8 +108,7 @@ const handler = async (req, res) => {
   }
 
   const userId = reqData.session_variables['x-hasura-user-id']
-  const { gameSessionId, eventType } = reqData.input
-  const payload = JSON.parse(reqData.input.payload)
+  const { gameSessionId, eventType, payload } = reqData.input
 
   // run some business logic
   const queryData = await executeQuery({ id: gameSessionId })

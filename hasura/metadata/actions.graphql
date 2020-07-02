@@ -9,7 +9,7 @@ type Mutation {
   sendGameEvent (
     gameSessionId: Int!
     eventType: gameEventType!
-    payload: String
+    payload: json
   ): SendGameEventOutput
 }
 
