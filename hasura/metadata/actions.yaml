@@ -5,9 +5,36 @@ actions:
     handler: http://10.0.0.21:1234/
   permissions:
   - role: anonymous
+- name: sendGameEvent
+  definition:
+    kind: synchronous
+    handler: http://10.0.0.21:1235/
+  permissions:
+  - role: user
 custom_types:
-  enums: []
-  input_objects: []
+  enums:
+  - name: SendGameEventCompletionStatusEnum
+    values:
+    - description: null
+      is_deprecated: null
+      value: complete
+    - description: null
+      is_deprecated: null
+      value: not_started
+    - description: null
+      is_deprecated: null
+      value: ongoing
+  - name: gameEventType
+    values:
+    - description: null
+      is_deprecated: null
+      value: START
+    - description: null
+      is_deprecated: null
+      value: GUESS
+  input_objects:
+  - name: SendGameEventGameSessionPkColumnsInput
   objects:
   - name: CreateTempUserOutput
+  - name: SendGameEventOutput
   scalars: []

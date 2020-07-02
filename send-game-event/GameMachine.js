@@ -1,14 +1,23 @@
-import { Machine, interpret, assign } from 'xstate';
+const { Machine, interpret, assign } = require('xstate')
 
 // MIKE: you should use something like state.nextEvents to determine what
 // buttons should be enabled on the client
 // (https://xstate.js.org/docs/guides/states.html#state-nextevents)
 
-// MIKE: you need to prevent players from guessing if it is not their turn. You
-// will be decoding their user id from their token, so you can depend the
-// "playerId" being accurate
-
 // MIKE: organize these free functions into namespaces 
+
+const isHostStarting = ({ hostId }, { playerId }) => hostId == playerId
+
+const enoughPlayers = context => context.playerIds.length > 1
+
+// MIKE: make this pure and compose it with ramda when you introduce that
+const canStart = (context, event) => {
+  if (!isHostStarting(context, event)) {
+    return false
+  }
+
+  return enoughPlayers(context, event)
+}
 
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -27,10 +36,10 @@ const updateClosestGuess = assign({
     if (
       !closestGuess
       || (
-          calcGuessDistance(value, secretNumber)
-          < calcGuessDistance(closestGuess.value, secretNumber)
-        )
-      ) {
+        calcGuessDistance(value, secretNumber)
+        < calcGuessDistance(closestGuess.value, secretNumber)
+      )
+    ) {
       return {
         playerId: playerIds[turnIndex],
         value
@@ -55,15 +64,6 @@ const setWinner = assign({
   winner: ({ closestGuess: { playerId } }) => playerId
 })
 
-const setSecretNumber = assign({
-  secretNumber: () => getRandomInt(-100, 100)
-})
-
-const mockSetSecretNumber = assign({
-  secretNumber: () => 50
-})
-
-const enoughPlayers = context => context.playerIds.length > 1
 
 const isClosestGuessersTurn = ({ closestGuess, turnIndex, playerIds }) => {
   if (!closestGuess) {
@@ -86,10 +86,9 @@ const GameMachine = Machine(
         on: {
           START: {
             target: 'ongoing',
-            cond: 'enoughPlayers'
+            cond: 'canStart'
           }
         },
-        exit: 'setSecretNumber'
       },
       ongoing: {
         on: {
@@ -113,25 +112,28 @@ const GameMachine = Machine(
       updateClosestGuess,
       incrementTurnIndex,
       setWinner,
-      // setSecretNumber
-      setSecretNumber: mockSetSecretNumber
     },
     guards: {
-      enoughPlayers,
       isClosestGuessersTurn,
-      isGuessersTurn
+      isGuessersTurn,
+      canStart,
     }
   }
 );
 
-const createGameMachine = playerIds => {
+const createGameMachine = (hostId, playerIds, secretNumber) => {
   return GameMachine.withContext({
-    secretNumber: null,
+    secretNumber,
     playerIds,
     closestGuess: null,
     turnIndex: 0,
-    winner: null
+    winner: null,
+    hostId
   })
 }
 
-module.exports = createGameMachine
+module.exports = {
+  GameMachine,
+  createGameMachine,
+  getRandomInt
+}

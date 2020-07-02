@@ -5,11 +5,39 @@ type Mutation {
 }
 
 
+type Mutation {
+  sendGameEvent (
+    gameSessionId: Int!
+    eventType: gameEventType!
+    payload: String
+  ): SendGameEventOutput
+}
 
+
+
+
+enum SendGameEventCompletionStatusEnum {
+  complete
+  not_started
+  ongoing
+}
+
+enum gameEventType {
+  START
+  GUESS
+}
+
+input SendGameEventGameSessionPkColumnsInput {
+  id : Int!
+}
 
 type CreateTempUserOutput {
   id : Int!
   name : String!
   token : String!
+}
+
+type SendGameEventOutput {
+  id : Int!
 }
 

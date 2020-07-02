@@ -1,0 +1,1 @@
+CREATE TABLE "public"."game_event"("id" serial NOT NULL, "game_session_id" integer NOT NULL, "event_type" text NOT NULL, "payload" json, PRIMARY KEY ("id") , FOREIGN KEY ("game_session_id") REFERENCES "public"."game_session"("id") ON UPDATE restrict ON DELETE cascade);

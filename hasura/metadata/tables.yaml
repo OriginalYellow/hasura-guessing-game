@@ -12,6 +12,13 @@
           name: game_session
 - table:
     schema: public
+    name: game_event
+  object_relationships:
+  - name: game_session
+    using:
+      foreign_key_constraint_on: game_session_id
+- table:
+    schema: public
     name: game_session
   object_relationships:
   - name: completionStatusByCompletionStatus
@@ -24,6 +31,13 @@
     using:
       foreign_key_constraint_on: winner_id
   array_relationships:
+  - name: game_events
+    using:
+      foreign_key_constraint_on:
+        column: game_session_id
+        table:
+          schema: public
+          name: game_event
   - name: players
     using:
       foreign_key_constraint_on:
