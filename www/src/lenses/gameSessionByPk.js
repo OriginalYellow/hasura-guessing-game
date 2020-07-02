@@ -31,10 +31,22 @@ const Data = {
 const GameSessionByPk = {
   host: ['host'],
   completionStatus: ['completion_status'],
-  players: ['players']
+  players: ['players'],
+  turnIndex: ['turn_index'],
+  winner: ['winner'],
+  closestGuesser: ['closest_guesser'],
+  closestGuess: ['closest_guess']
 }
 
 const Host = {
+  name: ['name']
+}
+
+const Winner = {
+  name: ['name']
+}
+
+const ClosestGuesser = {
   name: ['name']
 }
 
@@ -68,6 +80,16 @@ export const Transform = {
         Host.name
       ],
       completionStatus: GameSessionByPk.completionStatus,
+      closestGuesserName: [
+        GameSessionByPk.closestGuesser,
+        ClosestGuesser.name,
+      ],
+      closestGuess: GameSessionByPk.closestGuess,
+      turnIndex: GameSessionByPk.turnIndex,
+      winnerName: [ 
+        GameSessionByPk.winner,
+        Winner.name
+      ],
       players: L.collect([
         GameSessionByPk.players,
         L.elems,

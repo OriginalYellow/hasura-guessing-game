@@ -6,7 +6,7 @@ query gameSessionByPk($id: Int!) {
       name
     }
     completion_status
-    players {
+    players(order_by: {created_at: asc}) {
       user {
         id
         name
@@ -14,5 +14,15 @@ query gameSessionByPk($id: Int!) {
       game_session_id
       user_id
     }
+    turn_index
+    winner {
+      id
+      name
+    }
+    closest_guesser {
+      id
+      name
+    }
+    closest_guess
   }
 }

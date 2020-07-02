@@ -12,10 +12,18 @@
     {
       "src": "create-temp-user/index.js",
       "use": "@now/node"
+    },
+    {
+      "src": "send-game-event/index.js",
+      "use": "@now/node"
     }
   ],
   "routes": [{
       "src": "/create-temp-user",
+      "dest": "/create-temp-user/index.js"
+    },
+    {
+      "src": "/send-game-event",
       "dest": "/create-temp-user/index.js"
     },
     {

@@ -21,6 +21,9 @@
     schema: public
     name: game_session
   object_relationships:
+  - name: closest_guesser
+    using:
+      foreign_key_constraint_on: closest_guesser_id
   - name: completionStatusByCompletionStatus
     using:
       foreign_key_constraint_on: completion_status
@@ -61,9 +64,11 @@
     permission:
       columns:
       - closest_guess
+      - closest_guesser_id
       - completion_status
       - host_id
       - id
+      - turn_index
       - winner_id
       filter: {}
       limit: 10

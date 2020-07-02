@@ -59,11 +59,11 @@ const { Data, Model, GameSessionByPk } = Lens;
 
 // MIKE: you need to handle possible exceptions (like someone navigating
 // here without a query string)
+
 export default {
   data() {
     return {
       gameSession: null,
-      debugId: 19
     };
   },
 
@@ -84,26 +84,18 @@ export default {
           variables() {
             return { id: this.$route.query.id };
           },
-          updateQuery: (previousResult, { subscriptionData }) => {
-            return subscriptionData.game_session_by_pk;
-          }
+          updateQuery: (_, { subscriptionData: { game_session_by_pk } }) => game_session_by_pk
         },
         result(response) {
+          if (response.loading) {
+            return;
+          }
+
           if (!L.get(Model.playerById(this.userId), response)) {
-            this.$apollo
-              .mutate({
-                mutation: insertGameSessionUserOne,
-                variables: { gameSessionId: this.$route.query.id }
-              })
-              .then(
-                ({
-                  data: {
-                    insert_game_session_user_one: { game_session }
-                  }
-                }) => {
-                  this.gameSession = game_session;
-                }
-              );
+            this.$apollo.mutate({
+              mutation: insertGameSessionUserOne,
+              variables: { gameSessionId: this.$route.query.id }
+            });
           }
         }
       };
