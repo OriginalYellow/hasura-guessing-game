@@ -6,11 +6,11 @@
         <p class="text-center text-h2">Play View</p>
       </v-col>
 
-      <!-- game session details -->
       <v-col
         v-if="dataLoaded"
         cols="12"
       >
+        <!-- game session details -->
         <p>
           <!-- host display -->
           <span class="font-weight-bold">Host: </span>
@@ -34,10 +34,10 @@
           <!-- closest guess display -->
           <span v-if="gameSession.closestGuess">
             <span class="font-weight-bold">Closest Guesser: </span>
-              {{ gameSession.closestGuesserName }}
+            {{ gameSession.closestGuesserName }}
             <br>
             <span class="font-weight-bold">Closest Guess Amount: </span>
-              {{ gameSession.closestGuess }}
+            {{ gameSession.closestGuess }}
             <br>
           </span>
 
@@ -51,6 +51,7 @@
           </span>
         </p>
 
+        <!-- start game button -->
         <p>
           <v-btn
             v-if="gameSession.hostId == userId"
@@ -62,6 +63,7 @@
           </v-btn>
         </p>
 
+        <!-- guess input -->
         <v-row v-if="gameSession.completionStatus == 'ongoing'">
           <v-col cols="4">
             <v-text-field
@@ -80,6 +82,7 @@
         </v-row>
       </v-col>
 
+      <!-- not signed in alert -->
       <v-col
         v-else
         cols="6"
@@ -168,14 +171,6 @@ export default {
 
     dataLoaded() {
       return !!this.gameSession;
-    },
-
-    playerNames() {
-      if (this.dataLoaded) {
-        return this.gameSession.players.map(x => x.userName);
-      }
-
-      return [];
     }
   },
 
