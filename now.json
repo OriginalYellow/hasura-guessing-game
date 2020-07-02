@@ -24,7 +24,7 @@
     },
     {
       "src": "/send-game-event",
-      "dest": "/create-temp-user/index.js"
+      "dest": "/send-game-event/index.js"
     },
     {
       "src": "/js/(.*)",
