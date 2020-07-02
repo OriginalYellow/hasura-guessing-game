@@ -1,9 +1,12 @@
-const jsonFormat = require('json-format')
+// MIKE: replace accessors and destructuring with lenses
+
 const fetch = require('node-fetch')
-const { json, createError, send } = require('micro')
+const { json, send } = require('micro')
 const { interpret } = require('xstate')
 const { GameMachine, createGameMachine, getRandomInt } = require('./GameMachine')
 
+// MIKE: put gql queries in their own files
+// MIKE: use gql fragments 
 const HASURA_QUERY = `
   query gameSessionByPk($id: Int!) {
     game_session_by_pk(id: $id) {
@@ -47,9 +50,11 @@ const HASURA_OPERATION = `
   }
 `;
 
+// MIKE: try and eliminate duplicate code between this and the next function
 // execute the parent operation in Hasura
 const executeOperation = async (variables) => {
   const fetchResponse = await fetch(
+    // MIKE: replace second value with env var
     process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
     {
       method: 'POST',
@@ -58,6 +63,7 @@ const executeOperation = async (variables) => {
         variables
       }),
       headers: {
+        // MIKE: replace second value with env var
         'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
       }
     }
@@ -67,9 +73,11 @@ const executeOperation = async (variables) => {
   return data;
 };
 
+// MIKE: try and eliminate duplicate code between this and the last function
 // execute the parent operation in Hasura
 const executeQuery = async (variables) => {
   const fetchResponse = await fetch(
+    // MIKE: replace second value with env var
     process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
     {
       method: 'POST',
@@ -78,6 +86,7 @@ const executeQuery = async (variables) => {
         variables
       }),
       headers: {
+        // MIKE: replace second value with env var
         'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
       }
     }
@@ -101,14 +110,8 @@ const handler = async (req, res) => {
   const userId = reqData.session_variables['x-hasura-user-id']
   const { gameSessionId, eventType, payload } = reqData.input
 
-  console.log('reqData.input:')
-  console.log(reqData.input)
-
   // run some business logic
   const queryData = await executeQuery({ id: gameSessionId })
-
-  console.log('queryData:')
-  console.log(queryData)
 
   // create game service and send it the event
   let secretNumber = null
@@ -128,8 +131,8 @@ const handler = async (req, res) => {
   const gameService = interpret(gameMachine)
     .onTransition((state) => {
       if (state.changed) {
-        console.log(state.value)
-        console.log(state.context)
+        // console.log(state.value)
+        // console.log(state.context)
       }
     })
     .start();
@@ -145,13 +148,6 @@ const handler = async (req, res) => {
   // send input event
   gameService.send({ type: eventType, ...payload })
 
-  console.log('event:')
-  console.log({ type: eventType, ...payload })
-  console.log('context:')
-  console.log(gameService.state.context)
-  console.log('state:')
-  console.log(gameService.state.value)
-
   // execute operation
   const data = await executeOperation({
     secret_number: gameService.state.context.secretNumber,
@@ -165,9 +161,6 @@ const handler = async (req, res) => {
     payload,
     game_session_id: gameSessionId,
   })
-
-  console.log('data:')
-  console.log(data)
 
   send(
     res,

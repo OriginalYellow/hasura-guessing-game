@@ -25,17 +25,30 @@
           <!-- players display -->
           <span class="font-weight-bold">Players: </span>
           <span
-            v-for="(playerName, i) in playerNames"
-            :key="playerName"
-          >{{ playerName }}{{ ((i + 1) == playerNames.length) ? '' : ', ' }}</span>
+            v-for="(player, i) in gameSession.players"
+            :key="player.userId"
+            :class="gameSession.players[gameSession.turnIndex].userId == player.userId ? 'text-decoration-underline' : ''"
+          >{{ player.userName }}{{ ((i + 1) == gameSession.players.length) ? '' : ', ' }}</span>
           <br>
 
+          <!-- closest guess display -->
+          <span v-if="gameSession.closestGuess">
+            <span class="font-weight-bold">Closest Guesser: </span>
+              {{ gameSession.closestGuesserName }}
+            <br>
+            <span class="font-weight-bold">Closest Guess Amount: </span>
+              {{ gameSession.closestGuess }}
+            <br>
+          </span>
+
           <!-- winner display -->
-          <span
-            class="font-weight-bold"
-            v-if="gameSession.completionStatus == 'completed'"
-          >Winner: </span>
-          {{ gameSession.winnerName }}
+          <span v-if="gameSession.completionStatus == 'completed'">
+            <span
+              class="font-weight-bold"
+              v-if="gameSession.completionStatus == 'completed'"
+            >Winner: </span>
+            {{ gameSession.winnerName }}
+          </span>
         </p>
 
         <p>
