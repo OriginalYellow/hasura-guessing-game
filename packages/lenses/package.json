@@ -1,0 +1,11 @@
+{
+  "name": "@hasura-guessing-game/lenses",
+  "version": "1.0.0",
+  "description": "lens utility package for hasura-guessing-game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Joseph",
+  "license": "ISC"
+}

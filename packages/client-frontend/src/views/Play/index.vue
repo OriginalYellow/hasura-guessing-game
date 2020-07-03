@@ -100,15 +100,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import * as RA from "ramda-adjunct";
-import * as L from "partial.lenses";
-import gameSessionByPk from "@/gql/gameSessionByPk.gql";
-import gameSessionByPkSubscription from "@/gql/gameSessionByPkSubscription.gql";
-import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
-import sendGameEvent from "@/gql/sendGameEvent.gql";
-import { Transform, Lens } from "@/lenses/gameSessionByPk.js";
-const { Data, Model, GameSessionByPk } = Lens;
+import { mapState } from 'vuex';
+import * as RA from 'ramda-adjunct';
+import * as L from 'partial.lenses';
+import gameSessionByPk from '@/gql/gameSessionByPk.gql';
+import gameSessionByPkSubscription from '@/gql/gameSessionByPkSubscription.gql';
+import insertGameSessionUserOne from '@/gql/insertGameSessionUserOne.gql';
+import sendGameEvent from '@/gql/sendGameEvent.gql';
+import { models as M } from "@hasura-guessing-game/lenses";
+import * as transform from './transform'
 
 // MIKE: you need to handle possible exceptions (like someone navigating
 // here without a query string)
@@ -117,7 +117,7 @@ export default {
   data() {
     return {
       gameSession: null,
-      guessValue: null
+      guessValue: null,
     };
   },
 
@@ -127,51 +127,50 @@ export default {
         query: gameSessionByPk,
         variables() {
           return {
-            id: this.$route.query.id
+            id: this.$route.query.id,
           };
         },
         // NOTE: if there is no data payload in the response, update is passed
         // an empty object (for some dumb reason)
         // MIKE: the above might be due to a defect
-        update: data => (RA.isNilOrEmpty(data) ? null : Transform.data(data)),
+        update: (data) => (RA.isNilOrEmpty(data) ? null : transform.gameSessionByPk.data(data)),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {
             return { id: this.$route.query.id };
           },
-          updateQuery: (_, { subscriptionData: { game_session_by_pk } }) =>
-            game_session_by_pk
+          updateQuery: (_, { subscriptionData: { game_session_by_pk } }) => game_session_by_pk,
         },
         result(response) {
           if (response.loading) {
             return;
           }
 
-          if (!L.get(Model.playerById(this.userId), response)) {
+          if (!L.get(M.gameSessionByPk.Model.playerById(this.userId), response)) {
             this.$apollo.mutate({
               mutation: insertGameSessionUserOne,
-              variables: { gameSessionId: this.$route.query.id }
+              variables: { gameSessionId: this.$route.query.id },
             });
           }
-        }
+        },
       };
-    }
+    },
   },
 
   computed: {
-    ...mapState(["userId"]),
+    ...mapState(['userId']),
 
     isPlayersTurn() {
       return (
-        this.gameSession.completionStatus == "ongoing" &&
-        this.gameSession.players[this.gameSession.turnIndex].userId ==
-          this.userId
+        this.gameSession.completionStatus == 'ongoing'
+        && this.gameSession.players[this.gameSession.turnIndex].userId
+          == this.userId
       );
     },
 
     dataLoaded() {
       return !!this.gameSession;
-    }
+    },
   },
 
   methods: {
@@ -181,16 +180,16 @@ export default {
         variables: {
           eventType,
           gameSessionId: this.gameSession.id,
-          payload
-        }
+          payload,
+        },
       });
-    }
+    },
   },
 
   filters: {
-    snakeToNormalCase: function(str) {
-      return str.replace("_", " ");
-    }
-  }
+    snakeToNormalCase(str) {
+      return str.replace('_', ' ');
+    },
+  },
 };
 </script>
