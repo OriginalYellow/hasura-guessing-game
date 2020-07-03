@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "minimal multiplayer guessing game webapp, the purpose of which is to demonstrate hasura, graphql, and other cool things",
   "main": "index.js",
+  "private": "true",
+  "workspaces": [
+    "packages/*"
+  ],
   "engines": {
     "node": "12.x"
   },
   "scripts": {
     "dev": "concurrently -p \"{command}--{time}\" -t \"mm:ss\" \"npm:dev:start*\"",
-    "dev:start:www": "cd www && npm run serve",
+    "dev:start:client-frontend": "cd packages/client-frontend && npm run serve",
+    "dev:start:create-temp-user": "cd packages/create-temp-user && npm run dev:start",
+    "dev:start:send-game-event": "cd packages/send-game-event && npm run dev:start",
     "dev:start:hasura": "cd hasura && docker-compose up -d",
-    "dev:start:create-temp-user": "cd create-temp-user && npm run dev:start",
-    "dev:start:send-game-event": "cd send-game-event && npm run dev:start",
     "open:hasura-console": "cd hasura && npx hasura console",
     "check-migrations-dev": "cd hasura && hasura migrate status"
   },
@@ -28,6 +32,7 @@
   "devDependencies": {
     "concurrently": "^5.2.0",
     "dotenv": "^8.2.0",
-    "hasura-cli": "^1.2.2"
+    "hasura-cli": "^1.2.2",
+    "lerna": "^3.22.1"
   }
 }

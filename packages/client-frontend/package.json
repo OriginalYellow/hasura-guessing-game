@@ -1,5 +1,5 @@
 {
-  "name": "hasura-guessing-game-client",
+  "name": "@hasura-guessing-game/hasura-guessing-game-client",
   "version": "0.1.0",
   "private": true,
   "engines": {

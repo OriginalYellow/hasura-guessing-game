@@ -1,5 +1,5 @@
 {
-  "name": "create-temp-user",
+  "name": "@hasura-guessing-game/create-temp-user",
   "version": "1.0.0",
   "description": "createTempUser action for hasura-guessing-game",
   "main": "index.js",

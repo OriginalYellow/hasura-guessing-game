@@ -6,49 +6,49 @@
     "HASURA_ENDPOINT": "https://hasura.michaeljoseph.dev/v1/graphql"
   },
   "builds": [{
-      "src": "www/package.json",
+      "src": "/packages/client-frontend/package.json",
       "use": "@now/static-build"
     },
     {
-      "src": "create-temp-user/index.js",
+      "src": "/packages/create-temp-user/index.js",
       "use": "@now/node"
     },
     {
-      "src": "send-game-event/index.js",
+      "src": "/packages/send-game-event/index.js",
       "use": "@now/node"
     }
   ],
   "routes": [{
-      "src": "/create-temp-user",
+      "src": "/packages/create-temp-user",
       "dest": "/create-temp-user/index.js"
     },
     {
-      "src": "/send-game-event",
+      "src": "/packages/send-game-event",
       "dest": "/send-game-event/index.js"
     },
     {
       "src": "/js/(.*)",
-      "dest": "/www/js/$1"
+      "dest": "/packages/client-frontend/js/$1"
     },
     {
       "src": "/css/(.*)",
-      "dest": "/www/css/$1"
+      "dest": "/packages/client-frontend/css/$1"
     },
     {
       "src": "/fonts/(.*)",
-      "dest": "/www/fonts/$1"
+      "dest": "/packages/client-frontend/fonts/$1"
     },
     {
       "src": "/img/(.*)",
-      "dest": "/www/img/$1"
+      "dest": "/packages/client-frontend/img/$1"
     },
     {
       "src": "/assets/(.*)",
-      "dest": "/www/assets/$1"
+      "dest": "/packages/client-frontend/assets/$1"
     },
     {
       "src": ".*",
-      "dest": "/www/index.html"
+      "dest": "/packages/client-frontend/index.html"
     }
   ]
 }
