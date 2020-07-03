@@ -9,8 +9,7 @@ node_modules
 *.njsproj
 *.sln
 *.sw?
-/packages/send-game-event/scratch-*.js
-
 .vercel
 
-packages/create-temp-user/private.key
+*private.key
+scratch-*.js
