@@ -3,19 +3,24 @@
   "version": "1.0.0",
   "description": "sendGameEvent action for hasura-guessing-game",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "micro",
-    "dev:start": "micro-dev -p 1235"
+    "dev:start": "node -r esm ./node_modules/micro-dev/bin/micro-dev.js -p 1235 index.js",
+    "start": "node -r esm ./node_modules/.bin/micro index.js"
   },
   "author": "Michael Joseph",
   "license": "ISC",
   "dependencies": {
+    "esm": "^3.2.25",
     "json-format": "^1.0.1",
     "micro": "^9.3.4",
     "node-fetch": "^2.6.0",
+    "partial.lenses": "^14.17.0",
     "xstate": "^4.10.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/register": "^7.10.4",
     "micro-dev": "^3.0.0"
   }
 }

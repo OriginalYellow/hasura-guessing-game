@@ -1,4 +1,4 @@
-const { Machine, interpret, assign } = require('xstate')
+import { Machine, interpret, assign } from 'xstate'
 
 // MIKE: you should use something like state.nextEvents to determine what
 // buttons should be enabled on the client
@@ -19,7 +19,7 @@ const canStart = (context, event) => {
   return enoughPlayers(context, event)
 }
 
-const getRandomInt = (min, max) => {
+export const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
@@ -77,7 +77,7 @@ const isGuessersTurn = ({ turnIndex, playerIds }, { playerId }) => {
   return playerId == playerIds[turnIndex]
 }
 
-const GameMachine = Machine(
+export const gameMachine = Machine(
   {
     id: 'game',
     initial: 'not_started',
@@ -121,8 +121,8 @@ const GameMachine = Machine(
   }
 );
 
-const createGameMachine = (hostId, playerIds, secretNumber) => {
-  return GameMachine.withContext({
+export const createGameMachine = (hostId, playerIds, secretNumber) => {
+  return gameMachine.withContext({
     secretNumber,
     playerIds,
     closestGuess: null,
@@ -132,8 +132,8 @@ const createGameMachine = (hostId, playerIds, secretNumber) => {
   })
 }
 
-module.exports = {
-  GameMachine,
-  createGameMachine,
-  getRandomInt
-}
+// module.exports = {
+//   gameMachine,
+//   createGameMachine,
+//   getRandomInt
+// }

@@ -110,7 +110,7 @@ import sendGameEvent from '@/gql/sendGameEvent.gql';
 import { models as M } from "@hasura-guessing-game/lenses";
 import * as transform from './transform'
 
-// MIKE: you need to handle possible exceptions (like someone navigating
+// MIKE: you need to handle more possible exceptions (like someone navigating
 // here without a query string)
 
 export default {

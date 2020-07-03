@@ -116,12 +116,6 @@ const handler = async (req, res) => {
   console.log("res$:")
   console.log(res$)
 
-  // send response
-  // return {
-  //   ...data.insert_user_one,
-  //   token
-  // }
-
   send(
     res,
     '200',

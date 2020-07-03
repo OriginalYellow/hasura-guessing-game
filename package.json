@@ -4,9 +4,10 @@
   "description": "minimal multiplayer guessing game webapp, the purpose of which is to demonstrate hasura, graphql, and other cool things",
   "main": "index.js",
   "private": "true",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": ["packages/*"],
+    "nohoist": ["**/micro-dev"]
+  },
   "engines": {
     "node": "12.x"
   },

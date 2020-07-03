@@ -1,9 +1,12 @@
 // MIKE: replace accessors and destructuring with lenses
 
-const fetch = require('node-fetch')
-const { json, send } = require('micro')
-const { interpret } = require('xstate')
-const { GameMachine, createGameMachine, getRandomInt } = require('./GameMachine')
+import fetch from 'node-fetch'
+import { json, send } from 'micro'
+import { interpret } from 'xstate'
+import * as L from 'partial.lenses'
+import { models } from "@hasura-guessing-game/lenses";
+import { gameMachine, createGameMachine, getRandomInt } from './gameMachine.js'
+const { gameService: GameService, gameSessionByPk: GameSession } = models
 
 // MIKE: put gql queries in their own files
 // MIKE: use gql fragments 
@@ -110,27 +113,30 @@ const handler = async (req, res) => {
   const userId = reqData.session_variables['x-hasura-user-id']
   const { gameSessionId, eventType, payload } = reqData.input
 
-  // run some business logic
+  // query for game session
   const queryData = await executeQuery({ id: gameSessionId })
 
   // create game service and send it the event
   let secretNumber = null
 
-  if (queryData.data.game_session_by_pk.game_events.length > 0) {
-    secretNumber = queryData.data.game_session_by_pk.secret_number
+  if (GameSession.Get.gameEvents(queryData).length > 0) {
+    secretNumber = GameSession.Get.secretNumber(queryData)
   } else {
     secretNumber = getRandomInt(-100, 100)
   }
 
   const gameMachine = createGameMachine(
-    queryData.data.game_session_by_pk.host_id,
-    queryData.data.game_session_by_pk.players.map(x => x.user_id),
+    GameSession.Get.hostId(queryData),
+    GameSession.Get.playerIds(queryData),
     secretNumber,
   )
 
   const gameService = interpret(gameMachine)
     .onTransition((state) => {
       if (state.changed) {
+        // MIKE: when you add proper logging, turn this off and on with an
+        // environment variable instead of commenting it out:
+
         // console.log(state.value)
         // console.log(state.context)
       }
@@ -138,10 +144,13 @@ const handler = async (req, res) => {
     .start();
 
   // replay events on gameService to get most recent state
-  if (queryData.data.game_session_by_pk.game_events.length > 0) {
+  if (GameSession.Get.gameEvents(queryData).length > 0) {
     // MIKE: you should probably pass the events to send as an array instead
-    queryData.data.game_session_by_pk.game_events.forEach(event => {
-      gameService.send({ type: event.event_type, ...event.payload })
+    GameSession.Get.gameEvents(queryData).forEach(event => {
+      gameService.send({
+        type: event.event_type,
+        ...event.payload
+      })
     })
   }
 
@@ -149,13 +158,13 @@ const handler = async (req, res) => {
   gameService.send({ type: eventType, ...payload })
 
   // execute operation
-  const data = await executeOperation({
-    secret_number: gameService.state.context.secretNumber,
-    turn_index: gameService.state.context.turnIndex,
-    winner_id: gameService.state.context.winner,
-    closest_guess: gameService.state.context.closestGuess ? gameService.state.context.closestGuess.value : null,
-    closest_guesser_id: gameService.state.context.closestGuess ? gameService.state.context.closestGuess.playerId : null,
-    completion_status: gameService.state.value,
+  await executeOperation({
+    secret_number: GameService.Get.secretNumber(gameService),
+    turn_index: GameService.Get.turnIndex(gameService),
+    winner_id: GameService.Get.winner(gameService),
+    closest_guess: GameService.Get.closestGuess(gameService),
+    closest_guesser_id: GameService.Get.closestGuesserId(gameService),
+    completion_status: GameService.Get.completionStatus(gameService),
     pk_columns: { id: gameSessionId },
     event_type: eventType,
     payload,
@@ -166,7 +175,7 @@ const handler = async (req, res) => {
     res,
     '200',
     {
-      id: data.data.update_game_session_by_pk.id,
+      id: gameSessionId,
     })
 };
 
