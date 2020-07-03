@@ -19,12 +19,12 @@
     }
   ],
   "routes": [{
-      "src": "/packages/create-temp-user",
-      "dest": "/create-temp-user/index.js"
+      "src": "/create-temp-user",
+      "dest": "/packages/create-temp-user/index.js"
     },
     {
-      "src": "/packages/send-game-event",
-      "dest": "/send-game-event/index.js"
+      "src": "/send-game-event",
+      "dest": "/packages/send-game-event/index.js"
     },
     {
       "src": "/js/(.*)",

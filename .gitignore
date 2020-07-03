@@ -11,3 +11,5 @@ node_modules
 *.sw?
 create-temp-user/private.key
 send-game-event/scratch-001.js
+
+.vercel
