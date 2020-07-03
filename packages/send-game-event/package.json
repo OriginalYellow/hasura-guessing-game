@@ -1,6 +1,6 @@
 {
   "name": "@hasura-guessing-game/send-game-event",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "sendGameEvent action for hasura-guessing-game",
   "main": "index.js",
   "type": "module",
