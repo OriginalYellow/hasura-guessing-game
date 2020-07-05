@@ -5,7 +5,7 @@ import { json, send } from 'micro'
 import { interpret } from 'xstate'
 import * as L from 'partial.lenses'
 import { models } from "@hasura-guessing-game/lenses";
-import { gameMachine, createGameMachine, getRandomInt } from './gameMachine.js'
+import { gameMachine, createGameMachine, getRandomInt } from './src/gameMachine.js'
 const { gameService: GameService, gameSessionByPk: GameSession } = models
 
 // MIKE: put gql queries in their own files

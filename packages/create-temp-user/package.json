@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "createTempUser action for hasura-guessing-game",
   "main": "index.js",
+  "private": "true",
   "scripts": {
     "start": "micro",
     "dev:start": "micro-dev -p 1234"
@@ -17,5 +18,6 @@
   },
   "devDependencies": {
     "micro-dev": "^3.0.0"
-  }
+  },
+  "gitHead": "933a44c6229638f2e694d4b7c9892c46fd6dd6c6"
 }

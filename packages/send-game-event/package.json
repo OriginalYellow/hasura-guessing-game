@@ -2,15 +2,26 @@
   "name": "@hasura-guessing-game/send-game-event",
   "version": "0.0.1",
   "description": "sendGameEvent action for hasura-guessing-game",
+  "private": "true",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "dev:start": "node -r esm ./node_modules/micro-dev/bin/micro-dev.js -p 1235 index.js",
-    "start": "node -r esm ./node_modules/.bin/micro index.js"
+    "start": "node -r esm ./node_modules/.bin/micro index.js",
+    "build": "babel index.js --out-dir build && babel src --out-dir build/src",
+    "now-build": "babel index.js --out-dir build && babel src --out-dir build/src"
   },
   "author": "Michael Joseph",
   "license": "ISC",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-object-rest-spread"
+    ]
+  },
   "dependencies": {
+    "@hasura-guessing-game/lenses": "^0.0.1",
     "esm": "^3.2.25",
     "json-format": "^1.0.1",
     "micro": "^9.3.4",
@@ -19,8 +30,11 @@
     "xstate": "^4.10.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.10.4",
     "@babel/core": "^7.10.4",
-    "@babel/register": "^7.10.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
     "micro-dev": "^3.0.0"
-  }
+  },
+  "gitHead": "933a44c6229638f2e694d4b7c9892c46fd6dd6c6"
 }
