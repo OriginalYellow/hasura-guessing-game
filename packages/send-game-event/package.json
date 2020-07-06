@@ -1,6 +1,6 @@
 {
   "name": "@hasura-guessing-game/send-game-event",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "sendGameEvent action for hasura-guessing-game",
   "private": "true",
   "main": "index.js",
@@ -21,7 +21,7 @@
     ]
   },
   "dependencies": {
-    "@hasura-guessing-game/lenses": "^0.0.3",
+    "@hasura-guessing-game/lenses": "^0.0.4",
     "esm": "^3.2.25",
     "micro": "^9.3.4",
     "node-fetch": "^2.6.0",
