@@ -1,6 +1,5 @@
 import * as R from 'ramda';
 import * as L from 'partial.lenses';
-import * as RA from 'ramda-adjunct';
 import { models, util as U } from "@hasura-guessing-game/lenses";
 const { gameSessionByPk: M } = models 
 

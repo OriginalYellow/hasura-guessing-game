@@ -108,7 +108,7 @@ import gameSessionByPkSubscription from '@/gql/gameSessionByPkSubscription.gql';
 import insertGameSessionUserOne from '@/gql/insertGameSessionUserOne.gql';
 import sendGameEvent from '@/gql/sendGameEvent.gql';
 import { models as M } from "@hasura-guessing-game/lenses";
-import * as transform from './transform'
+import * as Transform from './transform'
 
 // MIKE: you need to handle more possible exceptions (like someone navigating
 // here without a query string)
@@ -133,7 +133,7 @@ export default {
         // NOTE: if there is no data payload in the response, update is passed
         // an empty object (for some dumb reason)
         // MIKE: the above might be due to a defect
-        update: (data) => (RA.isNilOrEmpty(data) ? null : transform.gameSessionByPk.data(data)),
+        update: (data) => (RA.isNilOrEmpty(data) ? null : Transform.gameSessionByPk.data(data)),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {
@@ -146,7 +146,7 @@ export default {
             return;
           }
 
-          if (!L.get(M.gameSessionByPk.Model.playerById(this.userId), response)) {
+          if (!L.get(M.gameSessionByPk.Lens.playerById(this.userId), response)) {
             this.$apollo.mutate({
               mutation: insertGameSessionUserOne,
               variables: { gameSessionId: this.$route.query.id },

@@ -7,6 +7,7 @@ import * as L from 'partial.lenses'
 import { models } from "@hasura-guessing-game/lenses";
 import { gameMachine, createGameMachine, getRandomInt } from './src/gameMachine.js'
 const { gameService: GameService, gameSessionByPk: GameSession } = models
+import * as Transform from './src/transform'
 
 // MIKE: put gql queries in their own files
 // MIKE: use gql fragments 
@@ -114,20 +115,20 @@ const handler = async (req, res) => {
   const { gameSessionId, eventType, payload } = reqData.input
 
   // query for game session
-  const queryData = await executeQuery({ id: gameSessionId })
+  const gameSessionData = await executeQuery({ id: gameSessionId })
 
   // create game service and send it the event
   let secretNumber = null
 
-  if (GameSession.Get.gameEvents(queryData).length > 0) {
-    secretNumber = GameSession.Get.secretNumber(queryData)
+  if (GameSession.Get.gameEvents(gameSessionData).length > 0) {
+    secretNumber = GameSession.Get.secretNumber(gameSessionData)
   } else {
     secretNumber = getRandomInt(-100, 100)
   }
 
   const gameMachine = createGameMachine(
-    GameSession.Get.hostId(queryData),
-    GameSession.Get.playerIds(queryData),
+    GameSession.Get.hostId(gameSessionData),
+    GameSession.Get.playerIds(gameSessionData),
     secretNumber,
   )
 
@@ -144,9 +145,9 @@ const handler = async (req, res) => {
     .start();
 
   // replay events on gameService to get most recent state
-  if (GameSession.Get.gameEvents(queryData).length > 0) {
+  if (GameSession.Get.gameEvents(gameSessionData).length > 0) {
     // MIKE: you should probably pass the events to send as an array instead
-    GameSession.Get.gameEvents(queryData).forEach(event => {
+    GameSession.Get.gameEvents(gameSessionData).forEach(event => {
       gameService.send({
         type: event.event_type,
         ...event.payload
@@ -159,12 +160,7 @@ const handler = async (req, res) => {
 
   // execute operation
   await executeOperation({
-    secret_number: GameService.Get.secretNumber(gameService),
-    turn_index: GameService.Get.turnIndex(gameService),
-    winner_id: GameService.Get.winner(gameService),
-    closest_guess: GameService.Get.closestGuess(gameService),
-    closest_guesser_id: GameService.Get.closestGuesserId(gameService),
-    completion_status: GameService.Get.completionStatus(gameService),
+    ...Transform.gameService.model(gameService),
     pk_columns: { id: gameSessionId },
     event_type: eventType,
     payload,

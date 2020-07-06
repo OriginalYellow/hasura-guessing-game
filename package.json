@@ -18,7 +18,8 @@
     "dev:start:send-game-event": "cd packages/send-game-event && npm run dev:start",
     "dev:start:hasura": "cd hasura && docker-compose up -d",
     "open:hasura-console": "cd hasura && npx hasura console",
-    "check-migrations-dev": "cd hasura && hasura migrate status"
+    "check-migrations-dev": "cd hasura && hasura migrate status",
+    "publish": "lerna publish --contents dist"
   },
   "repository": {
     "type": "git",

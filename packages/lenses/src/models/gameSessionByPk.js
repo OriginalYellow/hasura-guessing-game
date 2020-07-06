@@ -54,16 +54,6 @@ export const GameEvent = {
   id: ['id']
 }
 
-Model.playerById = (id) => [
-  Model.data,
-  Data.gameSessionByPk,
-  GameSessionByPk.players,
-  L.find(L.get([
-    Player.userId,
-    R.equals(id),
-  ])),
-];
-
 export const Lens = {
   gameSessionByPk: [Model.data, Data.gameSessionByPk],
 }
@@ -72,26 +62,17 @@ Lens.players = [Lens.gameSessionByPk, GameSessionByPk.players]
 Lens.gameEvents = [Lens.gameSessionByPk, GameSessionByPk.gameEvents]
 Lens.gameEvent = [Lens.gameSessionByPk, GameSessionByPk.gameEvents, L.elems]
 
+Lens.playerById = (id) => [
+  Lens.players,
+  L.find(L.get([
+    Player.userId,
+    R.equals(id),
+  ])),
+]
+
 export const Get = {
   gameEvents: L.get(Lens.gameEvents),
   secretNumber: L.get([Lens.gameSessionByPk, GameSessionByPk.secretNumber]),
   hostId: L.get([Lens.gameSessionByPk, GameSessionByPk.hostId]),
   playerIds: L.collect([Lens.players, L.elems, Player.userId]),
-}
-
-const testData = {
-  data: {
-    game_session_by_pk: {
-      players: [Array],
-      secret_number: null,
-      winner_id: null,
-      id: 65,
-      completion_status: 'not_started',
-      closest_guess: null,
-      closest_guesser_id: null,
-      turn_index: 0,
-      host_id: 57,
-      game_events: []
-    }
-  }
 }

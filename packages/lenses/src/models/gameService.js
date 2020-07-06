@@ -1,6 +1,3 @@
-import * as R from 'ramda';
-import * as L from 'partial.lenses';
-
 export const Model = {
   state: ['state'],
 };
@@ -27,12 +24,9 @@ export const Lens = {
 }
 
 Lens.closestGuess = [Lens.context, Context.closestGuess]
-
-export const Get = {
-  secretNumber: L.get([Lens.context, Context.secretNumber]),
-  turnIndex: L.get([Lens.context, Context.turnIndex]),
-  winner: L.get([Lens.context, Context.winner]),
-  closestGuess: L.get([Lens.closestGuess, ClosestGuess.value]),
-  closestGuesserId: L.get([Lens.closestGuess, ClosestGuess.playerId]),
-  completionStatus: L.get([Model.state, State.value]),
-}
+Lens.secretNumber = [Lens.context, Context.secretNumber]
+Lens.turnIndex = [Lens.context, Context.turnIndex]
+Lens.winner = [Lens.context, Context.winner]
+Lens.closestGuessValue = [Lens.closestGuess, ClosestGuess.value]
+Lens.closestGuesserId = [Lens.closestGuess, ClosestGuess.playerId]
+Lens.completionStatus = [Model.state, State.value]
