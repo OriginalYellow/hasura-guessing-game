@@ -1,11 +1,9 @@
-// MIKE: replace accessors and destructuring with lenses
-
 import fetch from 'node-fetch'
 import { json, send } from 'micro'
 import { interpret } from 'xstate'
-import * as L from 'partial.lenses'
 import { models } from "@hasura-guessing-game/lenses";
-import { gameMachine, createGameMachine, getRandomInt } from './src/gameMachine.js'
+// import { gameMachine, createGameMachine, getRandomInt } from './src/gameMachine.js'
+import { gameMachine, createGameMachine, getRandomInt } from '@hasura-guessing-game/game-machine'
 const { gameService: GameService, gameSessionByPk: GameSession } = models
 import * as Transform from './src/transform'
 

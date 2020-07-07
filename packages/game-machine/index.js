@@ -131,9 +131,3 @@ export const createGameMachine = (hostId, playerIds, secretNumber) => {
     hostId
   })
 }
-
-// module.exports = {
-//   gameMachine,
-//   createGameMachine,
-//   getRandomInt
-// }

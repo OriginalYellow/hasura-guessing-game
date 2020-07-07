@@ -19,7 +19,8 @@
     "dev:start:hasura": "cd hasura && docker-compose up -d",
     "open:hasura-console": "cd hasura && npx hasura console",
     "check-migrations-dev": "cd hasura && hasura migrate status",
-    "publish": "lerna publish --contents dist"
+    "publish": "lerna publish --contents dist",
+    "clean": "lerna clean"
   },
   "repository": {
     "type": "git",
