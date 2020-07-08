@@ -17,7 +17,7 @@ export const GameSessionByPk = {
   winner: ['winner'],
   closestGuesser: ['closest_guesser'],
   id: ['id'],
-  secretNumber: ['secretNumber'],
+  secretNumber: ['secret_number'],
   winnerId: ['winner_id'],
   closestGuess: ['closest_guess'],
   closestGuesserId: ['closest_guesser_id'],

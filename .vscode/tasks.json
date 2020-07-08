@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "check-migrations-prod",
+      "label": "hasura:check-migrations-prod",
       "type": "shell",
       "command": "npx hasura migrate status --endpoint https://hasura.michaeljoseph.dev --admin-secret",
       "args": [
@@ -16,7 +16,7 @@
       "problemMatcher": []
     },
     {
-      "label": "apply-migrations-prod",
+      "label": "hasura:apply-migrations-prod",
       "type": "shell",
       "command": "npx hasura migrate apply --endpoint https://hasura.michaeljoseph.dev --admin-secret",
       "args": [
@@ -28,7 +28,7 @@
       "problemMatcher": []
     },
     {
-      "label": "apply-metadata-prod",
+      "label": "hasura:apply-metadata-prod",
       "type": "shell",
       "command": "npx hasura metadata apply --endpoint https://hasura.michaeljoseph.dev --admin-secret",
       "args": [
@@ -38,7 +38,7 @@
         "cwd": "${workspaceRoot}/hasura"
       },
       "problemMatcher": []
-    }
+    },
   ],
   "inputs": [
     {

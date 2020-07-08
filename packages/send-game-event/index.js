@@ -1,127 +1,81 @@
 import fetch from 'node-fetch'
 import { json, send } from 'micro'
 import { interpret } from 'xstate'
-import { models } from "@hasura-guessing-game/lenses";
-// import { gameMachine, createGameMachine, getRandomInt } from './src/gameMachine.js'
-import { gameMachine, createGameMachine, getRandomInt } from '@hasura-guessing-game/game-machine'
-const { gameService: GameService, gameSessionByPk: GameSession } = models
+import { executeQuery, getRandomInt } from '@hasura-guessing-game/util'
+import { models } from "@hasura-guessing-game/lenses"
+import { createGameMachine } from '@hasura-guessing-game/game-machine'
 import * as Transform from './src/transform'
+const { gameService: GameService, gameSessionByPk: GameSession } = models
 
 // MIKE: put gql queries in their own files
 // MIKE: use gql fragments 
-const HASURA_QUERY = `
+const QUERY_GAME_SESSION_BY_PK = `
   query gameSessionByPk($id: Int!) {
     game_session_by_pk(id: $id) {
+      id
       players(order_by: {created_at: asc}) {
         user_id
       }
       secret_number
-      winner_id
-      id
-      completion_status
-      closest_guess
-      closest_guesser_id
-      turn_index
       host_id
       game_events(order_by: {created_at: asc}) {
-        event_type
-        payload
         id
+        event_type
+        user_id
+        payload
       }
     }
   }
 `
 
-const HASURA_OPERATION = `
-  mutation sendGameEvent($closest_guess: Int, $closest_guesser_id: Int, $completion_status: completion_status_enum, $secret_number: Int, $turn_index: Int, $winner_id: Int, $pk_columns: game_session_pk_columns_input!, $event_type: String, $payload: json, $game_session_id: Int) {
+const MUTATION_UPDATE_GAME_SESSION_BY_PK = `
+  mutation updateGameSessionByPk($closest_guess: Int, $closest_guesser_id: Int, $completion_status: completion_status_enum, $secret_number: Int, $turn_index: Int, $winner_id: Int, $pk_columns: game_session_pk_columns_input!, $event_type: String, $payload: json, $game_session_id: Int, $user_id: Int) {
     update_game_session_by_pk(_set: {closest_guess: $closest_guess, closest_guesser_id: $closest_guesser_id, completion_status: $completion_status, secret_number: $secret_number, turn_index: $turn_index, winner_id: $winner_id}, pk_columns: $pk_columns) {
-      closest_guess
-      closest_guesser_id
-      completion_status
       id
-      players(order_by: {created_at: asc}) {
-        user_id
-      }
-      secret_number
-      turn_index
-      winner_id
     }
-    insert_game_event_one(object: {game_session_id: $game_session_id, event_type: $event_type, payload: $payload}) {
+    insert_game_event_one(object: {game_session_id: $game_session_id, event_type: $event_type, payload: $payload, user_id: $user_id}) {
       id
     }
   }
-`;
+`
 
-// MIKE: try and eliminate duplicate code between this and the next function
-// execute the parent operation in Hasura
-const executeOperation = async (variables) => {
-  const fetchResponse = await fetch(
+// inject dependencies into executeQuery
+const executeQuery$ = executeQuery(
+  // MIKE: replace second value with env var
+  process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
+  {
     // MIKE: replace second value with env var
-    process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        query: HASURA_OPERATION,
-        variables
-      }),
-      headers: {
-        // MIKE: replace second value with env var
-        'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
-      }
-    }
-  );
+    'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
+  }
+)
 
-  const data = await fetchResponse.json();
-  return data;
-};
-
-// MIKE: try and eliminate duplicate code between this and the last function
-// execute the parent operation in Hasura
-const executeQuery = async (variables) => {
-  const fetchResponse = await fetch(
-    // MIKE: replace second value with env var
-    process.env.HASURA_ENDPOINT || 'http://localhost:8080/v1/graphql',
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        query: HASURA_QUERY,
-        variables
-      }),
-      headers: {
-        // MIKE: replace second value with env var
-        'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET || 'HVVTa3PSDocVJvbliFlu'
-      }
-    }
-  );
-
-  const data = await fetchResponse.json();
-  return data;
-};
-
-// Request Handler
+// request handler
 const handler = async (req, res) => {
   // get request data
   let reqData = null
   try {
-    reqData = await json(req);
-  } catch (e) {
-    // MIKE: this will throw silently and return an empty object
-    reqData = {}
+    reqData = await json(req)
+  } catch (error) {
+    send(res, 400, { error })
+    return
   }
 
   const userId = reqData.session_variables['x-hasura-user-id']
   const { gameSessionId, eventType, payload } = reqData.input
 
   // query for game session
-  const gameSessionData = await executeQuery({ id: gameSessionId })
+  const gameSessionData = await executeQuery$(
+    QUERY_GAME_SESSION_BY_PK,
+    { id: gameSessionId }
+  )
 
-  // create game service and send it the event
+  // create and start gameService
   let secretNumber = null
-
-  if (GameSession.Get.gameEvents(gameSessionData).length > 0) {
-    secretNumber = GameSession.Get.secretNumber(gameSessionData)
-  } else {
+  if (!GameSession.Get.secretNumber(gameSessionData)) {
+    // generate a random secret number if none exists
     secretNumber = getRandomInt(-100, 100)
+  } else {
+    secretNumber = GameSession.Get.secretNumber(gameSessionData)
   }
 
   const gameMachine = createGameMachine(
@@ -142,35 +96,42 @@ const handler = async (req, res) => {
     })
     .start();
 
-  // replay events on gameService to get most recent state
+  // replay old events on gameService to get most recent state
   if (GameSession.Get.gameEvents(gameSessionData).length > 0) {
-    // MIKE: you should probably pass the events to send as an array instead
-    GameSession.Get.gameEvents(gameSessionData).forEach(event => {
-      gameService.send({
-        type: event.event_type,
-        ...event.payload
-      })
-    })
+    gameService.send(
+      GameSession.Get.gameEvents(gameSessionData)
+      // MIKE: overwriting the payload's playerId like this will prevent a
+      // mismatch between that and the event's user_id from causing access
+      // control problems, but it may result in the payload being technically
+      // "incorrect". this applies to other similar cases later in file
+      // MIKE: extract this mapping into a lens and a transform. this applies to
+      // other similar cases later in file
+        .map(event => ({ type: event.event_type, ...event.payload, playerId: event.user_id }))
+    )
   }
 
-  // send input event
-  gameService.send({ type: eventType, ...payload })
+  // send new input event
+  gameService.send({ type: eventType, ...payload, playerId: userId })
 
-  // execute operation
-  await executeOperation({
-    ...Transform.gameService.model(gameService),
-    pk_columns: { id: gameSessionId },
-    event_type: eventType,
-    payload,
-    game_session_id: gameSessionId,
-  })
+  // update game_session record with latest state
+  await executeQuery$(
+    MUTATION_UPDATE_GAME_SESSION_BY_PK,
+    {
+      ...Transform.gameService.model(gameService),
+      pk_columns: { id: gameSessionId },
+      event_type: eventType,
+      payload: { ...payload, playerId: userId },
+      game_session_id: gameSessionId,
+      user_id: userId,
+    },
+  )
 
   send(
     res,
-    '200',
+    200,
     {
       id: gameSessionId,
     })
 };
 
-module.exports = handler;
+export default handler

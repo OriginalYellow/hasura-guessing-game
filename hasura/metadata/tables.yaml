@@ -17,6 +17,32 @@
   - name: game_session
     using:
       foreign_key_constraint_on: game_session_id
+  insert_permissions:
+  - role: user
+    permission:
+      check:
+        game_session:
+          players:
+            user_id:
+              _eq: X-Hasura-User-Id
+      set:
+        user_id: x-hasura-User-Id
+      columns:
+      - event_type
+      - game_session_id
+      - payload
+      backend_only: false
+  event_triggers:
+  - name: gameEventInserted
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook: http://10.0.0.21:1236/
 - table:
     schema: public
     name: game_session

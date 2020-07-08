@@ -19,10 +19,6 @@ const canStart = (context, event) => {
   return enoughPlayers(context, event)
 }
 
-export const getRandomInt = (min, max) => {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
 const calcGuessDistance = (guessValue, secretNumber) => {
   if (guessValue <= secretNumber) {
     return (secretNumber - guessValue);

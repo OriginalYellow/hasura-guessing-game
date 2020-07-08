@@ -12,13 +12,15 @@
     "node": "12.x"
   },
   "scripts": {
-    "dev": "concurrently -p \"{command}--{time}\" -t \"mm:ss\" \"npm:dev:start*\"",
-    "dev:start:client-frontend": "cd packages/client-frontend && npm run serve",
-    "dev:start:create-temp-user": "cd packages/create-temp-user && npm run dev:start",
-    "dev:start:send-game-event": "cd packages/send-game-event && npm run dev:start",
+    "dev": "concurrently -p \"{command}--{time}\" -t \"mm:ss\" \"yarn:dev:start*\"",
+    "dev:start:client-frontend": "cd packages/client-frontend && yarn run serve",
+    "dev:start:create-temp-user": "cd packages/create-temp-user && yarn run dev:start",
+    "dev:start:send-game-event": "cd packages/send-game-event && yarn run dev:start",
+    "dev:start:game-event-inserted": "cd packages/game-event-inserted && yarn run dev:start",
     "dev:start:hasura": "cd hasura && docker-compose up -d",
-    "open:hasura-console": "cd hasura && npx hasura console",
-    "check-migrations-dev": "cd hasura && hasura migrate status",
+    "open:hasura-console": "cd hasura && hasura console",
+    "hasura:check-migrations-dev": "cd hasura && hasura migrate status",
+    "hasura:export-metadata": "cd hasura && hasura metadata export",
     "publish": "lerna publish --contents dist",
     "clean": "lerna clean"
   },
