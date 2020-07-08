@@ -45,6 +45,10 @@
     webhook: http://10.0.0.21:1236/
 - table:
     schema: public
+    name: game_event_type
+  is_enum: true
+- table:
+    schema: public
     name: game_session
   object_relationships:
   - name: closest_guesser
