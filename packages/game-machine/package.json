@@ -1,6 +1,6 @@
 {
   "name": "@hasura-guessing-game/game-machine",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "game state machine package for hasura-guessing-game",
   "main": "index.js",
   "scripts": {

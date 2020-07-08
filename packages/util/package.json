@@ -1,6 +1,6 @@
 {
   "name": "@hasura-guessing-game/util",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "misc utility package for hasura-guessing-game",
   "main": "index.js",
   "scripts": {
