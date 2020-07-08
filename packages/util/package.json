@@ -19,7 +19,7 @@
   },
   "author": "Michael Joseph",
   "license": "ISC",
-  "gitHead": "933a44c6229638f2e694d4b7c9892c46fd6dd6c6",
+  "gitHead": "192a3efe3419d7c56059460a3c3286527e93c790",
   "devDependencies": {
     "@babel/cli": "^7.10.4",
     "@babel/core": "^7.10.4",

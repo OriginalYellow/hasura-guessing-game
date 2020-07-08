@@ -13,3 +13,4 @@ node_modules
 
 *private.key
 scratch-*.js
+**/dist
