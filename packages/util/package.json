@@ -9,6 +9,9 @@
     "prepare": "gulp prepare",
     "postpublish": "gulp postpublish"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "babel": {
     "presets": [
       "@babel/preset-env"
