@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@hasura-guessing-game/lenses": "^0.0.6",
+    "@hasura-guessing-game/game-machine": "^0.0.6",
+    "@hasura-guessing-game/util": "^0.0.6",
     "esm": "^3.2.25",
     "micro": "^9.3.4",
     "node-fetch": "^2.6.0",
