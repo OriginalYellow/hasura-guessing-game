@@ -32,6 +32,21 @@
       - game_session_id
       - payload
       backend_only: false
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - created_at
+      - event_type
+      - game_session_id
+      - id
+      - payload
+      - user_id
+      filter:
+        game_session:
+          players:
+            user_id:
+              _eq: X-Hasura-User-Id
   event_triggers:
   - name: gameEventInserted
     definition:
@@ -98,6 +113,7 @@
       - completion_status
       - host_id
       - id
+      - secret_number
       - turn_index
       - winner_id
       filter: {}

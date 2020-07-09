@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import * as L from 'partial.lenses';
 import { models, util as U } from "@hasura-guessing-game/lenses";
-const { gameSessionByPk: M } = models 
+const { gameSessionByPk: M } = models
 
 export const gameSessionByPk = {
   toProps: L.get([
@@ -12,10 +12,7 @@ export const gameSessionByPk = {
         M.GameSessionByPk.host,
         M.Host.name,
       ],
-      hostId: [
-        M.GameSessionByPk.host,
-        M.Host.id,
-      ],
+      hostId: M.GameSessionByPk.hostId,
       completionStatus: M.GameSessionByPk.completionStatus,
       closestGuesserName: [
         M.GameSessionByPk.closestGuesser,
@@ -23,6 +20,12 @@ export const gameSessionByPk = {
       ],
       closestGuess: M.GameSessionByPk.closestGuess,
       turnIndex: M.GameSessionByPk.turnIndex,
+      // MIKE: just using this for debugging
+      gameEventIds: L.collect([
+        M.GameSessionByPk.gameEvents,
+        L.elems,
+        M.GameEvent.id
+      ]),
       winnerName: [
         M.GameSessionByPk.winner,
         M.Winner.name,
@@ -39,3 +42,13 @@ export const gameSessionByPk = {
     }),
   ]),
 };
+
+const appendEvent = (event, data) => L.set(
+  M.Data.Lens.gameEventById(
+    L.get(M.GameEvent.id, event)
+  ),
+  event,
+  data
+)
+
+gameSessionByPk.appendEvent = appendEvent

@@ -6,7 +6,7 @@ import router from '@/router';
 import { apolloClient } from '@/main';
 import createTempUser from '@/gql/createTempUser.gql'
 import insertGameSessionOne from '@/gql/insertGameSessionOne.gql'
-import gameSessionByPk from '@/gql/gameSessionByPk.gql'
+import gameSessionByPk from '@/gql/gameSessionByPk/index.gql'
 
 // MIKE: i don't like using snake case for these local storage keys
 const previouslyLoggedInKey = 'guessing_game_previously_logged_in'
@@ -94,7 +94,7 @@ export default new Vuex.Store({
         mutation: insertGameSessionOne
       })
 
-      router.push({ name: 'Play', query: { id } })
+      router.push({ name: 'Play2', query: { id } })
     }
   },
 

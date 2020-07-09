@@ -2,11 +2,11 @@ import * as R from 'ramda';
 import * as L from 'partial.lenses';
 
 export const Model = {
-  data: 'data',
+  data: ['data'],
 };
 
 export const Data = {
-  gameSessionByPk: 'game_session_by_pk',
+  gameSessionByPk: ['game_session_by_pk'],
 };
 
 export const GameSessionByPk = {
@@ -68,6 +68,20 @@ Lens.playerById = (id) => [
     Player.userId,
     R.equals(id),
   ])),
+]
+
+Data.Lens = {
+  players: [Data.gameSessionByPk, GameSessionByPk.players],
+  gameEvents: [Data.gameSessionByPk, GameSessionByPk.gameEvents],
+  gameEvent: [Data.gameSessionByPk, GameSessionByPk.gameEvents, L.elems],
+}
+
+Data.Lens.gameEventById = (id) => [
+  Data.Lens.gameEvents,
+  L.find(L.get([
+    GameEvent.id,
+    R.equals(id)
+  ]))
 ]
 
 export const Get = {

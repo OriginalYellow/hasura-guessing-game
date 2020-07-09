@@ -1,0 +1,24 @@
+  subscription gameSessionByPk($id: Int!) {
+    game_session_by_pk(id: $id) {
+      id
+      players(order_by: {created_at: asc}) {
+        user {
+          id
+          name
+        }
+        user_id
+      }
+      secret_number
+      host_id
+      host {
+        name
+      }
+      game_events(order_by: {created_at: asc}) {
+        id
+        event_type
+        game_session_id
+        user_id
+        payload
+      }
+    }
+  }

@@ -1,0 +1,5 @@
+mutation insertGameEventOne($payload: json!, $eventType: game_event_type_enum!, $gameSessionId: Int!) {
+  insert_game_event_one(object: {payload: $payload, game_session_id: $gameSessionId, event_type: $eventType}) {
+    id
+  }
+}

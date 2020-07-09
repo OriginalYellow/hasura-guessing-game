@@ -55,7 +55,7 @@
         <p>
           <v-btn
             v-if="gameSession.hostId == userId"
-            @click="sendGameEvent('START', { playerId: userId })"
+            @click="insertGameEventOne('START', { playerId: userId })"
             :disabled="gameSession.completionStatus !== 'not_started'"
             color="green"
           >
@@ -72,7 +72,7 @@
             />
 
             <v-btn
-              @click="sendGameEvent('GUESS', { value: guessValue, playerId: userId })"
+              @click="insertGameEventOne('GUESS', { value: guessValue, playerId: userId })"
               :disabled="!isPlayersTurn"
               color="primary"
             >
@@ -103,10 +103,11 @@
 import { mapState } from 'vuex';
 import * as RA from 'ramda-adjunct';
 import * as L from 'partial.lenses';
-import gameSessionByPk from '@/gql/gameSessionByPk.gql';
-import gameSessionByPkSubscription from '@/gql/gameSessionByPkSubscription.gql';
+import gameSessionByPk from '@/gql/gameSessionByPk/index.gql';
+import gameSessionByPkSubscription from '@/gql/gameSessionByPk/subscription.gql';
 import insertGameSessionUserOne from '@/gql/insertGameSessionUserOne.gql';
 import sendGameEvent from '@/gql/sendGameEvent.gql';
+import insertGameEventOne from '@/gql/insertGameEventOne/index.gql'
 import { models as M } from "@hasura-guessing-game/lenses";
 import * as Transform from './transform'
 
@@ -133,7 +134,7 @@ export default {
         // NOTE: if there is no data payload in the response, update is passed
         // an empty object (for some dumb reason)
         // MIKE: the above might be due to a defect
-        update: (data) => (RA.isNilOrEmpty(data) ? null : Transform.gameSessionByPk.data(data)),
+        update: (data) => (RA.isNilOrEmpty(data) ? null : Transform.gameSessionByPk.toProps(data)),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {
@@ -184,6 +185,17 @@ export default {
         },
       });
     },
+
+    insertGameEventOne(eventType, payload) {
+      this.$apollo.mutate({
+        mutation: insertGameEventOne,
+        variables: {
+          eventType,
+          gameSessionId: this.gameSession.id,
+          payload,
+        },
+      });
+    }
   },
 
   filters: {
