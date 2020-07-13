@@ -134,7 +134,7 @@ export default {
         // NOTE: if there is no data payload in the response, update is passed
         // an empty object (for some dumb reason)
         // MIKE: the above might be due to a defect
-        update: (data) => (RA.isNilOrEmpty(data) ? null : Transform.gameSessionByPk.toProps(data)),
+        update: (data) => (RA.isNilOrEmpty(data) ? null : Transform.gameSessionByPk.props(data)),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {

@@ -81,19 +81,13 @@ export default {
         update: data =>
           RA.isNilOrEmpty(data)
             ? null
-            : Transform.gameSessionByPk.toProps(data),
+            : Transform.gameSessionByPk.props(data),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {
             return { id: this.$route.query.id };
           },
           updateQuery: (previousResult, { subscriptionData: { data: subscriptionResult } }) => {
-            console.log('previousResult in subscription update:')
-            console.log(previousResult)
-
-            console.log('subscriptionResult in subscription update:')
-            console.log(subscriptionResult)
-
             return subscriptionResult
           }
         },
@@ -159,6 +153,13 @@ export default {
             )
           });
         },
+        // NOTE: "If you provide an optimisticResponse option to the mutation
+        // then the update function will be run twice. Once immediately after
+        // you call client.mutate with the data from optimisticResponse. After
+        // the mutation successfully executes against the server the changes
+        // made in the first call to update will be rolled back and update will
+        // be called with the actual data returned by the mutation and not just
+        // the optimistic response."
         optimisticResponse: {
           insert_game_event_one: {
             id: optimisticEventId,
