@@ -87,12 +87,6 @@ const handler = async (req, res) => {
       }
     })
     .start();
-
-  console.log("mapped events:")
-  console.log(
-    GameSession.Get.gameEvents(gameSessionData)
-      .map(event => ({ type: event.event_type, ...event.payload, playerId: event.user_id }))
-  )
   
   // replay old events on gameService to get most recent state
   if (GameSession.Get.gameEvents(gameSessionData).length > 0) {
@@ -110,9 +104,6 @@ const handler = async (req, res) => {
 
   // send new input event
   gameService.send({ type: eventType, ...payload, playerId: userId })
-
-  console.log('Transform.gameService.model(gameService):')
-  console.log(Transform.gameService.model(gameService))
 
   // update game_session record with latest state
   await executeQuery$(

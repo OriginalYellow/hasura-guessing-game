@@ -9,9 +9,9 @@
         user_id
       }
       secret_number
-      host_id
       host {
         name
+        id
       }
       game_events(order_by: {created_at: asc}) {
         id

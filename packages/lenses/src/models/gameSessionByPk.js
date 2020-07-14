@@ -51,7 +51,8 @@ export const User = {
 export const GameEvent = {
   eventType: ['event_type'],
   payload: ['payload'],
-  id: ['id']
+  id: ['id'],
+  userId: ['user_id']
 }
 
 Data.Lens = {

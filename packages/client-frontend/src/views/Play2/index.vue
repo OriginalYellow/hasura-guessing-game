@@ -48,10 +48,11 @@ import * as L from "partial.lenses";
 import gameSessionByPk from "@/gql/gameSessionByPk/minimumGameState/index.gql";
 import gameSessionByPkSubscription from "@/gql/gameSessionByPk/minimumGameState/subscription.gql";
 import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
-import sendGameEvent from "@/gql/sendGameEvent.gql";
 import insertGameEventOne from "@/gql/insertGameEventOne/returnEvent.gql";
+import { interpret } from "xstate";
+import { createGameMachine } from "@hasura-guessing-game/game-machine";
 import { models as M } from "@hasura-guessing-game/lenses";
-import * as Transform from "./transform";
+import transforms from "./transform";
 
 // MIKE: you need to handle more possible exceptions (like someone navigating
 // here without a query string)
@@ -62,6 +63,10 @@ export default {
   data() {
     return {
       gameSession: null,
+      localGameState: null,
+      localGameContext: null,
+      transformedLocalGameState: null,
+      // gameService: null,
       guessValue: null
     };
   },
@@ -79,16 +84,17 @@ export default {
         // an empty object (for some dumb reason)
         // MIKE: the above might be due to a defect
         update: data =>
-          RA.isNilOrEmpty(data)
-            ? null
-            : Transform.gameSessionByPk.props(data),
+          RA.isNilOrEmpty(data) ? null : transforms.gameSessionByPk.props(data),
         subscribeToMore: {
           document: gameSessionByPkSubscription,
           variables() {
             return { id: this.$route.query.id };
           },
-          updateQuery: (previousResult, { subscriptionData: { data: subscriptionResult } }) => {
-            return subscriptionResult
+          updateQuery: (
+            _,
+            { subscriptionData: { data: subscriptionResult } }
+          ) => {
+            return subscriptionResult;
           }
         },
         result(response) {
@@ -117,18 +123,37 @@ export default {
     }
   },
 
-  methods: {
-    sendGameEvent(eventType, payload) {
-      this.$apollo.mutate({
-        mutation: sendGameEvent,
-        variables: {
-          eventType,
-          gameSessionId: this.gameSession.id,
-          payload
-        }
-      });
-    },
+  watch: {
+    gameSession(newSession, oldSession) {
+      if (!!newSession) {
+        const gameMachine = createGameMachine(
+          this.gameSession.hostId,
+          this.gameSession.players.map(x => x.userId),
+          this.gameSession.secretNumber
+        );
 
+        const gameService = interpret(gameMachine)
+          .onTransition((state, eventObj) => {
+            console.log("im transitioning!");
+            console.log("eventObj:");
+            console.log(eventObj);
+            this.gameState = state;
+            this.gameContext = state.context;
+          })
+          .start();
+
+        if (newSession.gameEvents.length > 0) {
+          gameService.send(newSession.gameEvents);
+        }
+
+        this.transformedLocalGameState = transforms.gameService.model(
+          gameService
+        );
+      }
+    }
+  },
+
+  methods: {
     insertGameEventOne(eventType, payload) {
       this.$apollo.mutate({
         mutation: insertGameEventOne,
@@ -147,19 +172,12 @@ export default {
 
           store.writeQuery({
             query: gameSessionByPk,
-            data: Transform.gameSessionByPk.appendEvent(
+            data: transforms.gameSessionByPk.appendEvent(
               newEvent,
               gameSessionByPkCached
             )
           });
         },
-        // NOTE: "If you provide an optimisticResponse option to the mutation
-        // then the update function will be run twice. Once immediately after
-        // you call client.mutate with the data from optimisticResponse. After
-        // the mutation successfully executes against the server the changes
-        // made in the first call to update will be rolled back and update will
-        // be called with the actual data returned by the mutation and not just
-        // the optimistic response."
         optimisticResponse: {
           insert_game_event_one: {
             id: optimisticEventId,
@@ -180,4 +198,10 @@ export default {
     }
   }
 };
+// NOTE: "If you provide an optimisticResponse option to the mutation then the
+// update function will be run twice. Once immediately after you call
+// client.mutate with the data from optimisticResponse. After the mutation
+// successfully executes against the server the changes made in the first call
+// to update will be rolled back and update will be called with the actual data
+// returned by the mutation and not just the optimistic response."
 </script>
