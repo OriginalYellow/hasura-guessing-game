@@ -7,12 +7,7 @@ export const props = R.applySpec({
   id: L.get(M.Data.Lens.id),
   hostName: L.get(M.Data.Lens.hostName),
   hostId: L.get(M.Data.Lens.hostId),
-  completionStatus: L.get(M.Data.Lens.completionStatus),
-  closestGuesserName: L.get(M.Data.Lens.closestGuesserName),
-  closestGuess: L.get(M.Data.Lens.closestGuess),
-  turnIndex: L.get(M.Data.Lens.turnIndex),
-  winnerName: L.get(M.Data.Lens.winnerName),
-  secretNumber: L.get([M.Data.Lens.secretNumber]),
+  secretNumber: L.get(M.Data.Lens.secretNumber),
   players: L.collect([
     M.Data.Lens.playerUser,
     R.applySpec({

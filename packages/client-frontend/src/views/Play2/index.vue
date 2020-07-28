@@ -10,6 +10,44 @@
         v-if="dataLoaded"
         cols="12"
       >
+        <!-- game session details -->
+        <p>
+          <!-- host display -->
+          <span class="font-weight-bold">Host: </span>
+          {{ gameSession.hostName }}
+          <br>
+
+          <!-- completion status display -->
+          <span class="font-weight-bold">Game Status: </span>
+          {{ gameState.completionStatus | snakeToNormalCase}}
+          <br>
+
+          <!-- players display -->
+          <span class="font-weight-bold">Players: </span>
+          <span
+            v-for="(player, i) in gameSession.players"
+            :key="player.userId"
+            :class="gameSession.players[gameState.turnIndex].userId == player.userId ? 'text-decoration-underline' : ''"
+          >{{ player.userName }}{{ ((i + 1) == gameSession.players.length) ? '' : ', ' }}</span>
+          <br>
+
+          <!-- closest guess display -->
+          <span v-if="gameState.closestGuess">
+            <span class="font-weight-bold">Closest Guesser ID: </span>
+            {{ gameState.closestGuesserId }}
+            <br>
+            <span class="font-weight-bold">Closest Guess Amount: </span>
+            {{ gameState.closestGuess }}
+            <br>
+          </span>
+
+          <!-- winner display -->
+          <span v-if="gameState.completionStatus == 'completed'">
+            <span class="font-weight-bold">Winner ID: </span>
+            {{ gameState.winnerId }}
+          </span>
+        </p>
+
         <!-- start game button -->
         <p>
           <v-btn
@@ -21,6 +59,23 @@
           </v-btn>
         </p>
 
+        <!-- guess input -->
+        <v-row v-if="gameState.completionStatus == 'ongoing'">
+          <v-col cols="4">
+            <v-text-field
+              outlined
+              v-model="guessValue"
+            />
+
+              <!-- :disabled="!isPlayersTurn" -->
+            <v-btn
+              @click="insertGameEventOne('GUESS', { value: guessValue, playerId: userId })"
+              color="primary"
+            >
+              make guess
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-col>
 
       <!-- not signed in alert -->
@@ -63,10 +118,7 @@ export default {
   data() {
     return {
       gameSession: null,
-      localGameState: null,
-      localGameContext: null,
-      transformedLocalGameState: null,
-      // gameService: null,
+      gameState: null,
       guessValue: null
     };
   },
@@ -124,31 +176,21 @@ export default {
   },
 
   watch: {
-    gameSession(newSession, oldSession) {
-      if (!!newSession) {
+    gameSession(gameSession) {
+      if (gameSession) {
         const gameMachine = createGameMachine(
           this.gameSession.hostId,
           this.gameSession.players.map(x => x.userId),
           this.gameSession.secretNumber
         );
 
-        const gameService = interpret(gameMachine)
-          .onTransition((state, eventObj) => {
-            console.log("im transitioning!");
-            console.log("eventObj:");
-            console.log(eventObj);
-            this.gameState = state;
-            this.gameContext = state.context;
-          })
-          .start();
+        const gameService = interpret(gameMachine).start();
 
-        if (newSession.gameEvents.length > 0) {
-          gameService.send(newSession.gameEvents);
+        if (gameSession.gameEvents.length > 0) {
+          gameService.send(gameSession.gameEvents);
         }
 
-        this.transformedLocalGameState = transforms.gameService.model(
-          gameService
-        );
+        this.gameState = transforms.gameService.gameState(gameService);
       }
     }
   },
