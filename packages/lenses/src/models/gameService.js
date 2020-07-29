@@ -16,7 +16,7 @@ export const Context = {
   turnIndex: ['turnIndex'],
   winner: ['winner'],
   closestGuess: ['closestGuess'],
-  message: ['message']
+  notification: ['notification']
 }
 
 export const ClosestGuess = {
@@ -32,7 +32,7 @@ Lens.closestGuess = [Lens.context, Context.closestGuess]
 Lens.secretNumber = [Lens.context, Context.secretNumber]
 Lens.turnIndex = [Lens.context, Context.turnIndex]
 Lens.winner = [Lens.context, Context.winner]
-Lens.message = [Lens.context, Context.message]
+Lens.notification = [Lens.context, Context.notification]
 Lens.closestGuessValue = [Lens.closestGuess, ClosestGuess.value]
 Lens.closestGuesserId = [Lens.closestGuess, ClosestGuess.playerId]
 Lens.completionStatus = [

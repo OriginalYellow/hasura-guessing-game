@@ -5,6 +5,16 @@ const { log } = actions;
 // buttons should be enabled on the client
 // (https://xstate.js.org/docs/guides/states.html#state-nextevents)
 
+const TOO_FEW_PLAYERS = 'not enough players to start'
+const GUESS_WRONG_TURN = 'guess on wrong turn'
+const PLAYER_WON = 'a player has won the game'
+
+export const notifications = {
+  TOO_FEW_PLAYERS,
+  GUESS_WRONG_TURN,
+  PLAYER_WON,
+}
+
 // MIKE: organize these free functions into namespaces 
 
 const isHostStarting = ({ hostId }, { playerId }) => hostId == playerId
@@ -61,6 +71,9 @@ const setWinner = assign({
   winner: ({ closestGuess: { playerId } }) => playerId
 })
 
+const setNotification = notification => assign({ notification })
+
+const showNotifications = assign({ showNotifications: true })
 
 const isClosestGuessersTurn = ({ closestGuess, turnIndex, playerIds }) => {
   if (!closestGuess) {
@@ -82,14 +95,7 @@ const gameMachine = {
       on: {
         START: [
           { target: 'ongoing', cond: 'canStart' },
-          {
-            actions: [
-              assign({
-                message: 'there are not enough players for you to start'
-              }),
-              'notify'
-            ]
-          },
+          { actions: [setNotification(TOO_FEW_PLAYERS), 'notify'] },
         ]
       },
     },
@@ -103,24 +109,17 @@ const gameMachine = {
             cond: 'isGuessersTurn',
             actions: ['updateClosestGuess', 'incrementTurnIndex']
           },
-          {
-            actions: [
-              assign({
-                message: 'you cannot guess because it\'s not your turn'
-              }),
-              'notify'
-            ]
-          },
+          { actions: [setNotification(GUESS_WRONG_TURN), 'notify'] },
         ]
       }
     },
     completed: {
-      entry: 'setWinner',
+      entry: ['setWinner', setNotification(PLAYER_WON), 'notify'],
       type: 'final'
     }
   },
   on: {
-    SHOW_NOTIFICATIONS: { actions: assign({ showNotifications: true }) }
+    SHOW_NOTIFICATIONS: { actions: 'showNotifications' }
   }
 }
 
@@ -137,6 +136,7 @@ export const createGameMachine = (
         updateClosestGuess,
         incrementTurnIndex,
         setWinner,
+        showNotifications,
         notify: (context, event) => context.showNotifications && notify(context, event),
       },
       guards: {
@@ -147,7 +147,7 @@ export const createGameMachine = (
     }
   ).withContext({
     showNotifications: false,
-    message: null,
+    notification: null,
     secretNumber,
     playerIds,
     closestGuess: null,

@@ -78,11 +78,11 @@
         </v-row>
 
         <v-snackbar v-model="snackbar">
-          {{ (gameState.message ? gameState.message : '') | sentenceCase }}
+          {{ fullNotificationText | sentenceCase }}
 
           <template v-slot:action="{ attrs }">
             <v-btn
-              color="pink"
+              color="red"
               text
               v-bind="attrs"
               @click="snackbar = false"
@@ -120,7 +120,10 @@ import gameSessionByPkSubscription from "@/gql/gameSessionByPk/minimumGameState/
 import insertGameSessionUserOne from "@/gql/insertGameSessionUserOne.gql";
 import insertGameEventOne from "@/gql/insertGameEventOne/returnEvent.gql";
 import { interpret } from "xstate";
-import { createGameMachine } from "@hasura-guessing-game/game-machine";
+import {
+  createGameMachine,
+  notifications
+} from "@hasura-guessing-game/game-machine";
 import { models as M } from "@hasura-guessing-game/lenses";
 import transforms from "./transform";
 
@@ -129,6 +132,12 @@ import transforms from "./transform";
 
 const optimisticEventId = -1;
 
+const fullNotifcationTexts = {
+  [notifications.TOO_FEW_PLAYERS]: 'there are not enough players for you to start',
+  [notifications.GUESS_WRONG_TURN]: 'you cannot guess because it\'s not your turn',
+  [notifications.PLAYER_WON]: 'a player has won the game!',
+};
+
 export default {
   data() {
     return {
@@ -136,7 +145,7 @@ export default {
       gameState: null,
       guessValue: null,
       snackbar: false,
-      eventCount: 0,
+      eventCount: 0
     };
   },
 
@@ -162,9 +171,7 @@ export default {
           updateQuery: (
             _,
             { subscriptionData: { data: subscriptionResult } }
-          ) => {
-            return subscriptionResult;
-          }
+          ) => subscriptionResult
         },
         result(response) {
           if (response.loading) {
@@ -189,6 +196,14 @@ export default {
 
     dataLoaded() {
       return !!this.gameSession;
+    },
+
+    fullNotificationText() {
+      if (this.gameState && this.gameState.notification) {
+        return fullNotifcationTexts[this.gameState.notification]
+      }
+
+      return ''
     }
   },
 
@@ -198,26 +213,44 @@ export default {
         return;
       }
 
+      // return early if there are no new game events
       if (this.eventCount > this.gameSession.gameEvents.length) {
         return;
       }
 
       this.eventCount = this.gameSession.gameEvents.length;
 
+      // create game machine
+      const notify = context => {
+        switch (context.notification) {
+          case notifications.TOO_FEW_PLAYERS:
+          case notifications.GUESS_WRONG_TURN:
+            // only notify if the last event was sent by this user
+            if (R.last(gameSession.gameEvents).playerId == this.userId) {
+              this.snackbar = true;
+            }
+            break;
+          case notifications.PLAYER_WON:
+            this.snackbar = true;
+            break;
+        }
+      };
+
+      const playerIds = this.gameSession.players.map(x => x.userId);
+
       const gameMachine = createGameMachine(
         this.gameSession.hostId,
-        this.gameSession.players.map(x => x.userId),
+        playerIds,
         this.gameSession.secretNumber,
-        context =>
-          context.showNotifications &&
-          R.last(gameSession.gameEvents).playerId == this.userId &&
-          (this.snackbar = true)
+        notify
       );
 
+      // start game service
       const gameService = interpret(gameMachine).start();
 
+      // playback events, and turn on notifications before sending the last one
       if (gameSession.gameEvents.length > 0) {
-        if ((gameSession.gameEvents.length == 1)) {
+        if (gameSession.gameEvents.length == 1) {
           gameService.send("SHOW_NOTIFICATIONS");
           gameService.send(gameSession.gameEvents);
         } else {
@@ -227,6 +260,7 @@ export default {
         }
       }
 
+      // set game state in data
       this.gameState = transforms.gameService.gameState(gameService);
     }
   },
