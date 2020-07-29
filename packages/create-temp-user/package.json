@@ -1,6 +1,6 @@
 {
   "name": "@hasura-guessing-game/create-temp-user",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "createTempUser action for hasura-guessing-game",
   "main": "index.js",
   "private": "true",
