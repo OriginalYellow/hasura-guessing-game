@@ -9,6 +9,7 @@ export const Model = {
 export const State = {
   context: ['context'],
   value: ['value'],
+  nextEvents: ['nextEvents'],
 }
 
 export const Context = {
@@ -26,6 +27,11 @@ export const ClosestGuess = {
 
 export const Lens = {
   context: [Model.state, State.context],
+  nextEvents: [
+    Model.state,
+    State.nextEvents,
+    L.valueOr([])
+  ],
 }
 
 Lens.closestGuess = [Lens.context, Context.closestGuess]

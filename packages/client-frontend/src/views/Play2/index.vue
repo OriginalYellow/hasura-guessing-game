@@ -19,7 +19,7 @@
 
           <!-- completion status display -->
           <span class="font-weight-bold">Game Status: </span>
-          {{ gameState.completionStatus | snakeToNormalCase}}
+          {{ computedGameService.completionStatus | snakeToNormalCase}}
           <br>
 
           <!-- players display -->
@@ -27,32 +27,32 @@
           <span
             v-for="(player, i) in gameSession.players"
             :key="player.userId"
-            :class="gameSession.players[gameState.turnIndex].userId == player.userId ? 'text-decoration-underline' : ''"
+            :class="gameSession.players[computedGameService.turnIndex].userId == player.userId ? 'text-decoration-underline' : ''"
           >{{ player.userName }}{{ ((i + 1) == gameSession.players.length) ? '' : ', ' }}</span>
           <br>
 
           <!-- closest guess display -->
-          <span v-if="gameState.closestGuess">
+          <span v-if="computedGameService.closestGuess">
             <span class="font-weight-bold">Closest Guesser ID: </span>
-            {{ gameState.closestGuesserId }}
+            {{ computedGameService.closestGuesserId }}
             <br>
             <span class="font-weight-bold">Closest Guess Amount: </span>
-            {{ gameState.closestGuess }}
+            {{ computedGameService.closestGuess }}
             <br>
           </span>
 
           <!-- winner display -->
-          <span v-if="gameState.completionStatus == 'completed'">
+          <span v-if="computedGameService.completionStatus == 'completed'">
             <span class="font-weight-bold">Winner ID: </span>
-            {{ gameState.winnerId }}
+            {{ computedGameService.winnerId }}
           </span>
         </p>
 
         <!-- start game button -->
         <p>
           <v-btn
-            v-if="gameSession.hostId == userId"
-            @click="insertGameEventOne('START', { playerId: userId })"
+            :disabled="!computedGameService.nextEvents.includes(eventTypes.START)"
+            @click="insertGameEventOne(eventTypes.START, { playerId: userId })"
             color="green"
           >
             start game
@@ -60,16 +60,17 @@
         </p>
 
         <!-- guess input -->
-        <v-row v-if="gameState.completionStatus == 'ongoing'">
+        <v-row>
           <v-col cols="4">
             <v-text-field
+              :disabled="!computedGameService.nextEvents.includes(eventTypes.GUESS)"
               outlined
               v-model="guessValue"
             />
 
-            <!-- :disabled="!isPlayersTurn" -->
             <v-btn
-              @click="insertGameEventOne('GUESS', { value: guessValue, playerId: userId })"
+              :disabled="!computedGameService.nextEvents.includes(eventTypes.GUESS)"
+              @click="insertGameEventOne(eventTypes.GUESS, { value: guessValue, playerId: userId })"
               color="primary"
             >
               make guess
@@ -122,7 +123,8 @@ import insertGameEventOne from "@/gql/insertGameEventOne/returnEvent.gql";
 import { interpret } from "xstate";
 import {
   createGameMachine,
-  notifications
+  notifications,
+  eventTypes
 } from "@hasura-guessing-game/game-machine";
 import { models as M } from "@hasura-guessing-game/lenses";
 import transforms from "./transform";
@@ -133,19 +135,22 @@ import transforms from "./transform";
 const optimisticEventId = -1;
 
 const fullNotifcationTexts = {
-  [notifications.TOO_FEW_PLAYERS]: 'there are not enough players for you to start',
-  [notifications.GUESS_WRONG_TURN]: 'you cannot guess because it\'s not your turn',
-  [notifications.PLAYER_WON]: 'a player has won the game!',
+  [notifications.TOO_FEW_PLAYERS]:
+    "there are not enough players for you to start the game - there needs to be at least 2",
+  [notifications.GUESS_WRONG_TURN]:
+    "you cannot guess because it's not your turn",
+  [notifications.PLAYER_WON]: "a player has won the game!"
 };
 
 export default {
   data() {
     return {
       gameSession: null,
-      gameState: null,
+      gameService: null,
       guessValue: null,
       snackbar: false,
-      eventCount: 0
+      eventCount: 0,
+      eventTypes,
     };
   },
 
@@ -178,6 +183,8 @@ export default {
             return;
           }
 
+          // add the current user to the game as a player if they are not
+          // already
           if (
             !L.get(M.gameSessionByPk.Lens.playerById(this.userId), response)
           ) {
@@ -194,16 +201,24 @@ export default {
   computed: {
     ...mapState(["userId"]),
 
+    computedGameService() {
+      return transforms.gameService.gameState(this.gameService);
+    },
+
     dataLoaded() {
-      return !!this.gameSession;
+      return !!this.gameSession && !!this.gameService;
     },
 
     fullNotificationText() {
-      if (this.gameState && this.gameState.notification) {
-        return fullNotifcationTexts[this.gameState.notification]
+      if (this.dataLoaded && this.computedGameService.notification) {
+        return (
+          fullNotifcationTexts[this.computedGameService.notification] ||
+          // fallback to the original text if no "full text" exists
+          this.computedGameService.notification
+        );
       }
 
-      return ''
+      return "";
     }
   },
 
@@ -225,12 +240,13 @@ export default {
         switch (context.notification) {
           case notifications.TOO_FEW_PLAYERS:
           case notifications.GUESS_WRONG_TURN:
+          case notifications.NON_HOST_CANT_START:
             // only notify if the last event was sent by this user
             if (R.last(gameSession.gameEvents).playerId == this.userId) {
               this.snackbar = true;
             }
             break;
-          case notifications.PLAYER_WON:
+          default:
             this.snackbar = true;
             break;
         }
@@ -260,8 +276,8 @@ export default {
         }
       }
 
-      // set game state in data
-      this.gameState = transforms.gameService.gameState(gameService);
+      // set game service in data
+      this.gameService = gameService;
     }
   },
 

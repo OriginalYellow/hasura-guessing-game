@@ -8,27 +8,30 @@ const { log } = actions;
 const TOO_FEW_PLAYERS = 'not enough players to start'
 const GUESS_WRONG_TURN = 'guess on wrong turn'
 const PLAYER_WON = 'a player has won the game'
+const NON_HOST_CANT_START = 'you must be host to start the game'
 
 export const notifications = {
   TOO_FEW_PLAYERS,
   GUESS_WRONG_TURN,
   PLAYER_WON,
+  NON_HOST_CANT_START,
 }
 
-// MIKE: organize these free functions into namespaces 
+const START = 'START'
+const GUESS = 'GUESS'
+const SHOW_NOTIFICATIONS = 'SHOW_NOTIFICATIONS'
 
-const isHostStarting = ({ hostId }, { playerId }) => hostId == playerId
-
-const enoughPlayers = context => context.playerIds.length > 1
-
-// MIKE: make this pure and compose it with ramda when you introduce that
-const canStart = (context, event) => {
-  if (!isHostStarting(context, event)) {
-    return false
-  }
-
-  return enoughPlayers(context, event)
+export const eventTypes = {
+  START,
+  GUESS,
+  SHOW_NOTIFICATIONS,
 }
+
+// MIKE: organize these free functions into namespaces maybe
+
+const isNonHostStarting = ({ hostId }, { playerId }) => hostId !== playerId
+
+const tooFewPlayers = context => context.playerIds.length < 2
 
 const calcGuessDistance = (guessValue, secretNumber) => {
   if (guessValue <= secretNumber) {
@@ -83,8 +86,10 @@ const isClosestGuessersTurn = ({ closestGuess, turnIndex, playerIds }) => {
   return closestGuess.playerId == playerIds[turnIndex]
 }
 
-const isGuessersTurn = ({ turnIndex, playerIds }, { playerId }) => {
-  return playerId == playerIds[turnIndex]
+const guessIsExactlyRight = (context, event) => event.value == context.secretNumber
+
+const isNotGuessersTurn = ({ turnIndex, playerIds }, { playerId }) => {
+  return playerId !== playerIds[turnIndex]
 }
 
 const gameMachine = {
@@ -93,9 +98,16 @@ const gameMachine = {
   states: {
     not_started: {
       on: {
-        START: [
-          { target: 'ongoing', cond: 'canStart' },
-          { actions: [setNotification(TOO_FEW_PLAYERS), 'notify'] },
+        [START]: [
+          {
+            cond: 'isNonHostStarting',
+            actions: [setNotification(NON_HOST_CANT_START), 'notify']
+          },
+          {
+            cond: 'tooFewPlayers',
+            actions: [setNotification(TOO_FEW_PLAYERS), 'notify']
+          },
+          { target: 'ongoing' },
         ]
       },
     },
@@ -104,12 +116,17 @@ const gameMachine = {
         '': [
           { target: 'completed', cond: 'isClosestGuessersTurn' }
         ],
-        GUESS: [
+        [GUESS]: [
           {
-            cond: 'isGuessersTurn',
-            actions: ['updateClosestGuess', 'incrementTurnIndex']
+            cond: 'isNotGuessersTurn',
+            actions: [setNotification(GUESS_WRONG_TURN), 'notify']
           },
-          { actions: [setNotification(GUESS_WRONG_TURN), 'notify'] },
+          {
+            cond: 'guessIsExactlyRight',
+            actions: 'updateClosestGuess',
+            target: 'completed'
+          },
+          { actions: ['updateClosestGuess', 'incrementTurnIndex'] },
         ]
       }
     },
@@ -119,7 +136,7 @@ const gameMachine = {
     }
   },
   on: {
-    SHOW_NOTIFICATIONS: { actions: 'showNotifications' }
+    [SHOW_NOTIFICATIONS]: { actions: 'showNotifications' }
   }
 }
 
@@ -141,8 +158,10 @@ export const createGameMachine = (
       },
       guards: {
         isClosestGuessersTurn,
-        isGuessersTurn,
-        canStart,
+        isNotGuessersTurn,
+        guessIsExactlyRight,
+        isNonHostStarting,
+        tooFewPlayers,
       }
     }
   ).withContext({
