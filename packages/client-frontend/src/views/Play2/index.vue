@@ -67,7 +67,7 @@
               v-model="guessValue"
             />
 
-              <!-- :disabled="!isPlayersTurn" -->
+            <!-- :disabled="!isPlayersTurn" -->
             <v-btn
               @click="insertGameEventOne('GUESS', { value: guessValue, playerId: userId })"
               color="primary"
@@ -76,6 +76,21 @@
             </v-btn>
           </v-col>
         </v-row>
+
+        <v-snackbar v-model="snackbar">
+          {{ (gameState.message ? gameState.message : '') | sentenceCase }}
+
+          <template v-slot:action="{ attrs }">
+            <v-btn
+              color="pink"
+              text
+              v-bind="attrs"
+              @click="snackbar = false"
+            >
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
       </v-col>
 
       <!-- not signed in alert -->
@@ -119,7 +134,9 @@ export default {
     return {
       gameSession: null,
       gameState: null,
-      guessValue: null
+      guessValue: null,
+      snackbar: false,
+      eventCount: 0,
     };
   },
 
@@ -177,21 +194,40 @@ export default {
 
   watch: {
     gameSession(gameSession) {
-      if (gameSession) {
-        const gameMachine = createGameMachine(
-          this.gameSession.hostId,
-          this.gameSession.players.map(x => x.userId),
-          this.gameSession.secretNumber
-        );
-
-        const gameService = interpret(gameMachine).start();
-
-        if (gameSession.gameEvents.length > 0) {
-          gameService.send(gameSession.gameEvents);
-        }
-
-        this.gameState = transforms.gameService.gameState(gameService);
+      if (!gameSession) {
+        return;
       }
+
+      if (this.eventCount > this.gameSession.gameEvents.length) {
+        return;
+      }
+
+      this.eventCount = this.gameSession.gameEvents.length;
+
+      const gameMachine = createGameMachine(
+        this.gameSession.hostId,
+        this.gameSession.players.map(x => x.userId),
+        this.gameSession.secretNumber,
+        context =>
+          context.showNotifications &&
+          R.last(gameSession.gameEvents).playerId == this.userId &&
+          (this.snackbar = true)
+      );
+
+      const gameService = interpret(gameMachine).start();
+
+      if (gameSession.gameEvents.length > 0) {
+        if ((gameSession.gameEvents.length == 1)) {
+          gameService.send("SHOW_NOTIFICATIONS");
+          gameService.send(gameSession.gameEvents);
+        } else {
+          gameService.send(R.init(gameSession.gameEvents));
+          gameService.send("SHOW_NOTIFICATIONS");
+          gameService.send(R.last(gameSession.gameEvents));
+        }
+      }
+
+      this.gameState = transforms.gameService.gameState(gameService);
     }
   },
 
@@ -237,7 +273,12 @@ export default {
   filters: {
     snakeToNormalCase(str) {
       return str.replace("_", " ");
-    }
+    },
+
+    sentenceCase: R.pipe(
+      R.juxt([R.pipe(R.head, R.toUpper), R.tail]),
+      R.join("")
+    )
   }
 };
 // NOTE: "If you provide an optimisticResponse option to the mutation then the

@@ -1,4 +1,5 @@
-import { Machine, interpret, assign } from 'xstate'
+import { Machine, interpret, assign, actions } from 'xstate'
+const { log } = actions;
 
 // MIKE: you should use something like state.nextEvents to determine what
 // buttons should be enabled on the client
@@ -73,52 +74,80 @@ const isGuessersTurn = ({ turnIndex, playerIds }, { playerId }) => {
   return playerId == playerIds[turnIndex]
 }
 
-export const gameMachine = Machine(
-  {
-    id: 'game',
-    initial: 'not_started',
-    states: {
-      not_started: {
-        on: {
-          START: {
-            target: 'ongoing',
-            cond: 'canStart'
-          }
-        },
+const gameMachine = {
+  id: 'game',
+  initial: 'not_started',
+  states: {
+    not_started: {
+      on: {
+        START: [
+          { target: 'ongoing', cond: 'canStart' },
+          {
+            actions: [
+              assign({
+                message: 'there are not enough players for you to start'
+              }),
+              'notify'
+            ]
+          },
+        ]
       },
-      ongoing: {
-        on: {
-          '': [
-            { target: 'completed', cond: 'isClosestGuessersTurn' }
-          ],
-          GUESS: {
+    },
+    ongoing: {
+      on: {
+        '': [
+          { target: 'completed', cond: 'isClosestGuessersTurn' }
+        ],
+        GUESS: [
+          {
             cond: 'isGuessersTurn',
             actions: ['updateClosestGuess', 'incrementTurnIndex']
-          }
-        }
-      },
-      completed: {
-        entry: 'setWinner',
-        type: 'final'
+          },
+          {
+            actions: [
+              assign({
+                message: 'you cannot guess because it\'s not your turn'
+              }),
+              'notify'
+            ]
+          },
+        ]
       }
     },
-  },
-  {
-    actions: {
-      updateClosestGuess,
-      incrementTurnIndex,
-      setWinner,
-    },
-    guards: {
-      isClosestGuessersTurn,
-      isGuessersTurn,
-      canStart,
+    completed: {
+      entry: 'setWinner',
+      type: 'final'
     }
+  },
+  on: {
+    SHOW_NOTIFICATIONS: { actions: assign({ showNotifications: true }) }
   }
-);
+}
 
-export const createGameMachine = (hostId, playerIds, secretNumber) => {
-  return gameMachine.withContext({
+export const createGameMachine = (
+  hostId,
+  playerIds,
+  secretNumber,
+  notify = (() => null)
+) => {
+  return Machine(
+    gameMachine,
+    {
+      actions: {
+        updateClosestGuess,
+        incrementTurnIndex,
+        setWinner,
+        notify: (context, event) => context.showNotifications && notify(context, event),
+      },
+      guards: {
+        isClosestGuessersTurn,
+        isGuessersTurn,
+        canStart,
+      }
+    }
+  ).withContext({
+    showNotifications: false,
+    message: null,
     secretNumber,
     playerIds,
     closestGuess: null,

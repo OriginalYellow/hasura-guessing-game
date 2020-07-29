@@ -9,5 +9,6 @@ export const gameState = R.applySpec({
   winnerId: L.get(M.Lens.winner),
   closestGuess: L.get(M.Lens.closestGuessValue),
   closestGuesserId: L.get(M.Lens.closestGuesserId),
-  completionStatus: L.get(M.Lens.completionStatus)
+  completionStatus: L.get(M.Lens.completionStatus),
+  message: L.get(M.Lens.message)
 })
