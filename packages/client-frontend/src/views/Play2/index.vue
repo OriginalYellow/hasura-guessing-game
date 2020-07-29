@@ -33,8 +33,8 @@
 
           <!-- closest guess display -->
           <span v-if="computedGameService.closestGuess">
-            <span class="font-weight-bold">Closest Guesser ID: </span>
-            {{ computedGameService.closestGuesserId }}
+            <span class="font-weight-bold">Closest Guesser: </span>
+            {{ gameSession.players.find(x => x.userId == computedGameService.closestGuesserId).userName }}
             <br>
             <span class="font-weight-bold">Closest Guess Amount: </span>
             {{ computedGameService.closestGuess }}
@@ -43,8 +43,9 @@
 
           <!-- winner display -->
           <span v-if="computedGameService.completionStatus == 'completed'">
-            <span class="font-weight-bold">Winner ID: </span>
-            {{ computedGameService.winnerId }}
+            <span class="font-weight-bold">Winner: </span>
+            {{ gameSession.players.find(x => x.userId == computedGameService.winnerId).userName }}
+            <!-- {{ computedGameService.winnerId }} -->
           </span>
         </p>
 
@@ -149,8 +150,7 @@ export default {
       gameService: null,
       guessValue: null,
       snackbar: false,
-      eventCount: 0,
-      eventTypes,
+      eventTypes
     };
   },
 
@@ -223,17 +223,20 @@ export default {
   },
 
   watch: {
-    gameSession(gameSession) {
-      if (!gameSession) {
+    gameSession(newGameSession, oldGameSession) {
+      if (!newGameSession) {
         return;
       }
 
-      // return early if there are no new game events
-      if (this.eventCount > this.gameSession.gameEvents.length) {
+      // return early if there are no new game events or if the new game session
+      // doesn't have a new id
+      if (
+        !!oldGameSession &&
+        newGameSession.gameEvents.length == oldGameSession.gameEvents.length &&
+        newGameSession.id !== oldGameSession.id
+      ) {
         return;
       }
-
-      this.eventCount = this.gameSession.gameEvents.length;
 
       // create game machine
       const notify = context => {
@@ -242,7 +245,7 @@ export default {
           case notifications.GUESS_WRONG_TURN:
           case notifications.NON_HOST_CANT_START:
             // only notify if the last event was sent by this user
-            if (R.last(gameSession.gameEvents).playerId == this.userId) {
+            if (R.last(newGameSession.gameEvents).playerId == this.userId) {
               this.snackbar = true;
             }
             break;
@@ -252,12 +255,12 @@ export default {
         }
       };
 
-      const playerIds = this.gameSession.players.map(x => x.userId);
+      const playerIds = newGameSession.players.map(x => x.userId);
 
       const gameMachine = createGameMachine(
-        this.gameSession.hostId,
+        newGameSession.hostId,
         playerIds,
-        this.gameSession.secretNumber,
+        newGameSession.secretNumber,
         notify
       );
 
@@ -265,14 +268,14 @@ export default {
       const gameService = interpret(gameMachine).start();
 
       // playback events, and turn on notifications before sending the last one
-      if (gameSession.gameEvents.length > 0) {
-        if (gameSession.gameEvents.length == 1) {
+      if (newGameSession.gameEvents.length > 0) {
+        if (newGameSession.gameEvents.length == 1) {
           gameService.send("SHOW_NOTIFICATIONS");
-          gameService.send(gameSession.gameEvents);
+          gameService.send(newGameSession.gameEvents);
         } else {
-          gameService.send(R.init(gameSession.gameEvents));
+          gameService.send(R.init(newGameSession.gameEvents));
           gameService.send("SHOW_NOTIFICATIONS");
-          gameService.send(R.last(gameSession.gameEvents));
+          gameService.send(R.last(newGameSession.gameEvents));
         }
       }
 
