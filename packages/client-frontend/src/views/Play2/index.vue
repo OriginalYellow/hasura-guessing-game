@@ -10,6 +10,33 @@
         v-if="dataLoaded"
         cols="12"
       >
+        <!-- copy link alert prompt -->
+        <v-row v-show="computedGameService.completionStatus == 'not_started'">
+          <v-col class="col-sm-7">
+            <v-alert
+              type="info"
+              border="left"
+              text
+              dense
+            >
+              <!-- link this page to friends to invite them to the game <v-btn>copy link</v-btn> -->
+              <v-row align="center">
+                <v-col class="grow">link this page to friends to invite them to the game</v-col>
+                <v-col class="shrink">
+                  <v-btn
+                    @click="copyLink"
+                    color="blue"
+                    dark
+                  >
+                    copy link
+                  </v-btn>
+                </v-col>
+              </v-row>
+
+            </v-alert>
+          </v-col>
+        </v-row>
+
         <!-- game session details -->
         <p>
           <!-- host display -->
@@ -54,6 +81,7 @@
           <v-btn
             :disabled="!computedGameService.nextEvents.includes(eventTypes.START)"
             @click="insertGameEventOne(eventTypes.START, { playerId: userId })"
+            :dark="computedGameService.nextEvents.includes(eventTypes.START)"
             color="green"
           >
             start game
@@ -100,11 +128,10 @@
         v-else
         cols="6"
       >
-          <!-- prominent -->
         <v-alert
           type="warning"
           border="left"
-          outlined
+          text
         >
           <v-row align="center">
             <v-col class="grow">You must first sign up before you can join this game.</v-col>
@@ -298,6 +325,10 @@ export default {
 
   methods: {
     ...mapActions(["signup"]),
+
+    copyLink() {
+      navigator.clipboard.writeText(window.location.href);
+    },
 
     insertGameEventOne(eventType, payload) {
       this.$apollo.mutate({
