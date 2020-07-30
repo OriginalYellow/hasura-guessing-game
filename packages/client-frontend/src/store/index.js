@@ -63,23 +63,21 @@ export default new Vuex.Store({
       if (typeof localStorage != 'undefined') {
         localStorage.setItem(previouslyLoggedInKey, 'true')
 
-        // store user data in local storage (i know this is bad but i dont think
-        // it's too bad in this case)
+        // store user data in local storage (i know this is a security no-no,
+        // but i dont think it's too bad in this case)
         localStorage.setItem(tokenKey, token)
         localStorage.setItem(userIdKey, id)
         localStorage.setItem(userNameKey, name)
       }
 
-      // NOTE: source code for restartWebsockets:
-      // https://github.com/thetre97/vue-cli-plugin-apollo/blob/e4a25845386eb2c921b3d1e1b4ee00ce41a88df9/graphql-client/src/index.js#L182
+      // NOTE: source code for restartWebsockets: https://tinyurl.com/y6xnn38h
       if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
       
       // store it in memory too
       dispatch('login', { token, userName: name, userId: id })
 
-      // redirect to home page (this avoids a certain defect that happens if you
-      // sign up while on the play screen)
-      router.push('/')
+      // refresh page (explanation: https://tinyurl.com/yxamfmfs)
+      router.go()
     },
 
     login({ commit }, { token, userId, userName }) {

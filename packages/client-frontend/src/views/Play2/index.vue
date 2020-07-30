@@ -100,12 +100,24 @@
         v-else
         cols="6"
       >
+          <!-- prominent -->
         <v-alert
           type="warning"
-          prominent
           border="left"
+          outlined
         >
-          You must first sign up before you can join this game.
+          <v-row align="center">
+            <v-col class="grow">You must first sign up before you can join this game.</v-col>
+            <v-col class="shrink">
+              <v-btn
+                @click="signup"
+                color="blue"
+                dark
+              >
+                sign up
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-alert>
       </v-col>
     </v-row>
@@ -113,7 +125,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import * as R from "ramda";
 import * as RA from "ramda-adjunct";
 import * as L from "partial.lenses";
@@ -285,6 +297,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(["signup"]),
+
     insertGameEventOne(eventType, payload) {
       this.$apollo.mutate({
         mutation: insertGameEventOne,
