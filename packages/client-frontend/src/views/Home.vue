@@ -3,12 +3,12 @@
     <v-row>
       <v-col cols="12">
         <!-- view title -->
-        <p class="text-center text-h2">Home View</p>
+        <p class="text-center text-h3">How to Play the Guessing Game</p>
       </v-col>
 
-      <v-col cols="6">
+      <v-col sm="9" md="6" xs="12">
         <p class="font-weight-bold">
-          Game Rules
+          Game Rules:
         </p>
         <ul>
           <li>when the game starts, the computer choses a random, secret number</li>
@@ -19,7 +19,6 @@
               <li>if player X's guess is the closest guess so far, and another player doesn't make a closer guess after player X makes theirs, player X will win at the start of their next turn</li>
             </ul>
           </li>
-          <li>the current closest guess (and the player who made it) will be displayed at all times to all players</li>
         </ul>
       </v-col>
     </v-row>

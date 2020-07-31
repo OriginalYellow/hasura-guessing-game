@@ -3,7 +3,7 @@
     <v-row justify="center">
       <!-- view title -->
       <v-col cols="12">
-        <p class="text-center text-h2">Play View</p>
+        <p class="text-center text-h3">Play View</p>
       </v-col>
 
       <v-col
@@ -126,7 +126,7 @@
       <!-- not signed in alert -->
       <v-col
         v-else
-        cols="6"
+        md="6"
       >
         <v-alert
           type="warning"
@@ -138,7 +138,7 @@
             <v-col class="shrink">
               <v-btn
                 @click="signup"
-                color="blue"
+                color="green"
                 dark
               >
                 sign up
